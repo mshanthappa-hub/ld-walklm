@@ -1,0 +1,7 @@
+phase	split	mean	sample_std	n
+before	train	0.9580591511	0.0009490925	10
+before	valid	0.9389008977	0.0002705150	10
+before	test	0.8726239906	0.0004920125	10
+correct_and_smooth	train	0.9845372937	0.0000806963	10
+correct_and_smooth	valid	0.9400096636	0.0002987397	10
+correct_and_smooth	test	0.8747530490	0.0004873863	10

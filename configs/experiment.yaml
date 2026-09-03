@@ -1,0 +1,55 @@
+dataset:
+  name: ogbn-products
+  split: official
+  ogb_version: 1.3.6
+  nodes: 2449029
+  edges_after_preprocessing: 123718280
+  train_nodes: 196615
+  validation_nodes: 39323
+  test_nodes: 2213091
+  classes: 47
+
+external_data: true
+features:
+  ld_bert_hidden_state: 768
+  embeddinggemma_300m_walklm: 768
+  raw_ogb: 100
+  combined: 1636
+
+training:
+  model: sagn
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  stages: 4
+  epoch_setting: [300, 100, 100, 100]
+  thresholds: [0.95, 0.95, 0.999]
+  K: 2
+  label_K: 9
+  use_labels: true
+  zero_inits: true
+  hidden_size: 512
+  attention_heads: 1
+  learning_rate: 0.001
+  weight_decay: 0
+  batch_size: 50000
+  evaluation_batch_size: 100000
+  dropout: 0.5
+  attention_dropout: 0.4
+  input_dropout: 0.2
+  label_dropout: 0.5
+  chunks: 4
+  memory_efficient: true
+
+correct_and_smooth:
+  operations: [correction, smoothing]
+  correction_layers: 50
+  smoothing_layers: 50
+  correction_alpha: 0.30
+  smoothing_alpha: 0.65
+  correction_adjacency: DAD
+  smoothing_adjacency: DAD
+  scale: 25
+
+reporting:
+  runs: 10
+  standard_deviation: unbiased_sample
+  ddof: 1
