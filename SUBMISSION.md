@@ -55,9 +55,8 @@ selected without test feedback.
 ## Remaining user/OGB actions
 
 1. Add a monitored contact email.
-2. Compute and archive the LD `hidden_state.pt` SHA-256 and byte size.
-3. Send OGB the protocol disclosure and ask whether the exploratory history
+2. Send OGB the protocol disclosure and ask whether the exploratory history
    disqualifies this entry; do not omit it.
-4. If required, run a new pre-registered validation-only experiment and use
+3. If required, run a new pre-registered validation-only experiment and use
    test accuracy exactly once after the configuration is locked.
-5. Submit through the official OGB Google form only after the above is clear.
+4. Submit through the official OGB Google form only after the above is clear.

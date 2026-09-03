@@ -16,6 +16,7 @@
 - [x] Preserve and validate the recovered 1,636-dimensional SAGN integration.
 - [x] Recover the exact EmbeddingGemma command and semantic generation code.
 - [x] Recover the EmbeddingGemma artifact byte size and SHA-256.
+- [x] Record the LD input tensor byte size and SHA-256.
 - [x] Calculate the conservative multi-stage parameter count.
 - [x] Write a technical report and form-ready submission record.
 - [x] Preserve the tuning history and protocol audit.
@@ -23,7 +24,6 @@
 
 ## Before submitting
 
-- [ ] Record the LD input tensor byte size and SHA-256.
 - [ ] Preserve or link the LD tensor outside Git; the EmbeddingGemma artifact is
       in the original WalkLM LFS commit.
 - [ ] Re-run the evaluator from downloaded release assets and compare its TSV

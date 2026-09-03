@@ -26,7 +26,8 @@ features:
       filename: hidden_state.pt
       expected_shape: [2449029, 768]
       dtype: float32
-      sha256: null
+      bytes: 7523417875
+      sha256: fb1309cb73d4b1199b3eef342d6d3dc7ce2d2e38c57d50543fd8da0c8bbd6ec7
     walklm:
       filename: walklm_products_2449029_embeddinggemma300m_walks4_len4_mean_norm_embeddings.pt
       expected_shape: [2449029, 768]

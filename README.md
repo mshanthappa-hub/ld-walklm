@@ -233,9 +233,9 @@ deviation.
 
 The final checkpoints, logs, checkpoint hashes, environment, evaluator
 outputs, training and C&S arguments, pinned revisions, SAGN integration, exact
-EmbeddingGemma command, and EmbeddingGemma artifact checksum are preserved.
-The LD tensor's byte size and SHA-256 still need to be recorded on a host that
-holds the released file.
+EmbeddingGemma command, and both external input artifact checksums are
+preserved. The verified tensor metadata is recorded in
+`artifacts/input_manifest.tsv`.
 
 The 423,228,606-parameter multi-stage count and technical report are included.
 However, the recovered test-aware tuning history is a substantive OGB protocol

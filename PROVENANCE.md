@@ -29,12 +29,13 @@ inside `bert-base-uncased.zip` (Google Drive file ID
 `10HHIgaRPgWyVZAX9_FDeOk5cHiOHO2Mv`). The WalkLM artifact filename was
 `walklm_products_2449029_embeddinggemma300m_walks4_len4_mean_norm_embeddings.pt`.
 
+The LD tensor is 7,523,417,875 bytes. Its locally computed SHA-256 is
+`fb1309cb73d4b1199b3eef342d6d3dc7ce2d2e38c57d50543fd8da0c8bbd6ec7`.
+
 The original WalkLM SHA-256 sidecar was recovered from commit `505f635`:
 `fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90`.
 The serialized dictionary is 8,503,030,973 bytes and contains both `walklm_x`
-and `raw_x`. The LD tensor checksum was not captured and remains `PENDING` in
-`artifacts/input_manifest.tsv`. On a host that still has both tensors, generate
-the completed manifest with:
+and `raw_x`. Reverify both trusted tensors and regenerate the manifest with:
 
 ```bash
 python scripts/verify_input_artifacts.py \
@@ -90,13 +91,12 @@ SAGN commit.
 
 The ten final prediction tensors, their SHA-256 hashes, logs, evaluator
 outputs, training arguments, post-processing arguments, feature integration,
-EmbeddingGemma settings, and EmbeddingGemma artifact checksum are preserved.
-
-The remaining artifact gap is the LD `hidden_state.pt` byte size and SHA-256.
-The source is identified by its official release file and Google Drive ID.
+EmbeddingGemma settings, and both external tensor byte sizes and SHA-256
+checksums are preserved. The LD source is identified by its official release
+file and Google Drive ID.
 
 Separately, `TUNING_AND_PROTOCOL.md` records test-aware selection discovered in
 the archived history. That protocol issue prevents the current result from
-being represented as submission-ready even after the LD checksum is filled.
+being represented as submission-ready even with the artifact metadata complete.
 
 External data must be declared as **Yes** for any future leaderboard submission.

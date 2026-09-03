@@ -25,7 +25,7 @@ trains a four-stage SAGN/SLE predictor and applies Correct \& Smooth (C\&S).
 Across seeds 0--9, the recorded final validation accuracy is
 $0.940010 \pm 0.000299$ and test accuracy is
 $0.874753 \pm 0.000487$, using unbiased sample standard deviation.
-The artifact audit recovered the exact embedding command, feature checksum,
+The artifact audit recovered the exact embedding command, input checksums,
 training outputs, and parameter accounting. It also found that test scores
 were viewed during encoder and C\&S selection. We therefore report this as an
 exploratory result and do not claim that it is eligible for the OGB
@@ -154,9 +154,10 @@ every preserved training log.
 The repository pins SAGN, LD, and WalkLM revisions; includes a validated patch
 for the 1,636-dimensional feature integration; archives exact training and
 C\&S commands; preserves per-seed evaluator outputs; and links a release with
-all ten final prediction tensors, training logs, and checkpoint hashes. The
-EmbeddingGemma checksum is recovered. The byte size and SHA-256 of the released
-LD tensor remain to be captured on a host holding that file.
+all ten final prediction tensors, training logs, and checkpoint hashes.
+Both external tensor byte sizes and SHA-256 checksums are recorded in the
+input manifest. The LD tensor is 7,523,417,875 bytes with SHA-256
+\texttt{fb1309cb73d4b1199b3eef342d6d3dc7ce2d2e38c57d50543fd8da0c8bbd6ec7}.
 
 \section{Protocol audit}\label{sec:audit}
 
@@ -181,6 +182,8 @@ more reproducible than the original ad hoc run. Its scientific value is as an
 exploratory result and artifact package. The remaining barrier to an official
 leaderboard claim is experimental protocol, not the arithmetic or checkpoint
 record.
+
+\enlargethispage{3\baselineskip}
 
 \section*{References}
 
