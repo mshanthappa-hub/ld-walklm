@@ -9,6 +9,11 @@ PYTHON_BIN=${PYTHON_BIN:-python}
 RESULTS_DIR=${RESULTS_DIR:-"${PWD}/validation_grid"}
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 HELPER="${SCRIPT_DIR}/post_process_validation_only.py"
+SEED_START=${SEED_START:-0}
+expected_seeds=()
+for ((offset = 0; offset < 10; offset++)); do
+    expected_seeds+=("$((SEED_START + offset))")
+done
 mkdir -p "${RESULTS_DIR}"
 
 export DGLBACKEND=pytorch
@@ -46,6 +51,7 @@ for correction_alpha in 0.30 0.35 0.40; do
                 --scale "${scale}" \
                 --operations correction smoothing \
                 --expected-runs 10 \
+                --expected-seeds "${expected_seeds[@]}" \
                 --output-json "${output_json}"
         done
     done

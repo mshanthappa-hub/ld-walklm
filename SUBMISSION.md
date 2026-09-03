@@ -58,5 +58,6 @@ selected without test feedback.
 2. Send OGB the protocol disclosure and ask whether the exploratory history
    disqualifies this entry; do not omit it.
 3. If required, run a new pre-registered validation-only experiment and use
-   test accuracy exactly once after the configuration is locked.
+   test accuracy exactly once after the configuration is locked. The committed
+   v2 workflow uses seeds `10..19` and stops before final test access.
 4. Submit through the official OGB Google form only after the above is clear.

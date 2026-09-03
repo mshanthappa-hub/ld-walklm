@@ -32,6 +32,8 @@
 - [ ] Disclose the test-aware selection history to OGB and obtain a ruling.
 - [ ] If required, run a clean, pre-registered validation-only experiment and
       evaluate the test split once after locking the method.
+- [ ] For v2, commit all 27 validation candidate records and
+      `locked_cs_config.json` before invoking the guarded final-test script.
 - [ ] Submit through the official OGB form only when protocol eligibility is
       resolved.
 - [ ] Add the submission date and official leaderboard URL or status here.

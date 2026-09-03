@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Run C&S while exposing only validation accuracy for model selection.
 
-This wrapper deliberately never evaluates or prints test labels. The upstream
-C&S implementation receives split indices because predictions are stored in
-train/validation/test order, but C&S itself receives labels only at train_nid.
+This wrapper deliberately never evaluates or prints test labels. It masks test
+labels before returning the dataset to upstream. The C&S implementation still
+receives split indices because predictions are stored in train/validation/test
+order, but C&S itself receives labels only at train_nid.
 """
 
 import glob
@@ -50,6 +51,10 @@ def load_output_files(output_path):
             f"{len(matched)}: {[seed for seed, _ in matched]}"
         )
     seed_ids = [seed for seed, _ in matched]
+    if args.expected_seeds and seed_ids != args.expected_seeds:
+        raise RuntimeError(
+            f"Expected seeds {args.expected_seeds}, found {seed_ids}"
+        )
     print(f"Detected model outputs for seeds {seed_ids}")
     return [
         upstream.torch.load(filename, map_location="cpu")
@@ -102,6 +107,7 @@ def calculate_validation_only(
 
 parser = upstream.define_parser()
 parser.add_argument("--expected-runs", type=int, default=10)
+parser.add_argument("--expected-seeds", type=int, nargs="+")
 parser.add_argument("--output-json", required=True)
 args = parser.parse_args()
 
@@ -113,9 +119,13 @@ original_load_dataset = upstream.load_dataset
 
 def load_dataset_and_capture(*load_args, **load_kwargs):
     global parsed_train_nid
-    data = original_load_dataset(*load_args, **load_kwargs)
+    data = list(original_load_dataset(*load_args, **load_kwargs))
     parsed_train_nid = data[3]
-    return data
+    labels = data[1].clone()
+    labels[data[5]] = -1
+    data[1] = labels
+    print(f"Masked {len(data[5])} test labels before validation-only C&S")
+    return tuple(data)
 
 
 upstream.load_dataset = load_dataset_and_capture

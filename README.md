@@ -156,7 +156,12 @@ The machine-readable configuration is in
 - [`SUBMISSION.md`](SUBMISSION.md): form-ready metadata and remaining actions.
 - [`scripts/tune_cs_validation_only.sh`](scripts/tune_cs_validation_only.sh):
   validation-only C&S grid and auditable configuration lock for future work.
-
+- [`protocol/v2_pre_registration.yaml`](protocol/v2_pre_registration.yaml):
+  committed seeds, training settings, C&S grid, selection rule, and test policy.
+- [`scripts/run_v2_validation_only.sh`](scripts/run_v2_validation_only.sh):
+  end-to-end v2 training and C&S selection without test-label evaluation.
+- [`scripts/run_final_test_once.sh`](scripts/run_final_test_once.sh): guarded
+  final evaluator that requires the validation records and lock to be committed.
 
 ## Checkpoints and logs
 
@@ -228,6 +233,32 @@ bash scripts/run_cs_detailed.sh
 The script requires exactly 10 non-empty stage-3 checkpoints and writes a
 fresh per-seed TSV before calculating the mean and unbiased sample standard
 deviation.
+
+## Forward validation-only v2 workflow
+
+The committed v2 protocol uses new seeds `10..19`, a dedicated prediction
+directory, validation-only training evaluation, and the frozen 27-candidate
+C&S grid. It intentionally stops after writing the selected configuration:
+
+```bash
+export SAGN_ROOT=/path/to/SAGN_with_SLE
+export PYTHON_BIN=/path/to/python
+export DATA_DIR=/path/to/OGB
+export V2_PROBS_DIR=/path/to/new_v2_intermediate_outputs
+export LD_FEATURE_PATH=/path/to/products_sagn/hidden_state.pt
+export WALKLM_FEATURE_PATH=/path/to/walklm_embeddinggemma.pt
+
+bash scripts/run_v2_validation_only.sh
+```
+
+Review and commit all files under `results/v2/validation_grid/` before running
+`scripts/run_final_test_once.sh`. The final script refuses to proceed unless
+the 27 candidate records and selected lock are tracked and unchanged, and it
+creates a durable marker as soon as test access begins.
+
+This prevents further test-driven choices from the v2 lock forward. It does
+not erase the historical v1 test exposure described in
+`TUNING_AND_PROTOCOL.md`.
 
 ## Reproducibility and submission status
 
