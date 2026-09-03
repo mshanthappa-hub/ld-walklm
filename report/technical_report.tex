@@ -1,0 +1,195 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.78in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{array}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\title{LD + EmbeddingGemma-WalkLM + SAGN on \texttt{ogbn-products}:\\A Ten-Seed Exploratory Study}
+\author{Meghana Shanthappa\\\small\url{https://github.com/MeghanaShanthappa}}
+\date{September 3, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We study a language-augmented node-classification pipeline for the Open Graph
+Benchmark \texttt{ogbn-products} dataset. The method concatenates released
+Label Deconvolution (LD) BERT features, graph-walk text embeddings from
+\texttt{google/embeddinggemma-300m}, and the original OGB features, then
+trains a four-stage SAGN/SLE predictor and applies Correct \& Smooth (C\&S).
+Across seeds 0--9, the recorded final validation accuracy is
+$0.940010 \pm 0.000299$ and test accuracy is
+$0.874753 \pm 0.000487$, using unbiased sample standard deviation.
+The artifact audit recovered the exact embedding command, feature checksum,
+training outputs, and parameter accounting. It also found that test scores
+were viewed during encoder and C\&S selection. We therefore report this as an
+exploratory result and do not claim that it is eligible for the OGB
+leaderboard without an explicit ruling or a clean validation-only rerun.
+\end{abstract}
+
+\section{Dataset and evaluation}
+
+We use the official \texttt{ogbn-products} split and the OGB evaluator
+(OGB 1.3.6). After the preprocessing used by SAGN, the graph contains
+2,449,029 nodes and 123,718,280 directed edges, with 196,615 training,
+39,323 validation, and 2,213,091 test nodes over 47 classes. Ten independent
+runs use seeds 0 through 9. We report the arithmetic mean and unbiased sample
+standard deviation ($n-1$ denominator) of the raw per-seed evaluator values.
+
+\section{Method}
+
+\subsection{Input representation}
+
+For every node, we concatenate the following tensors in a fixed column order:
+
+\begin{center}
+\begin{tabular}{lrp{8.2cm}}
+\toprule
+Component & Dimension & Origin \\
+\midrule
+LD BERT hidden state & 768 & Released \texttt{products\_sagn/hidden\_state.pt} from the LD authors \\
+EmbeddingGemma-WalkLM & 768 & Masked-mean pooled, normalized embeddings of attributed random walks \\
+Raw OGB feature & 100 & Original \texttt{ogbn-products} node feature \\
+\midrule
+Concatenated input & 1,636 & Order: LD, EmbeddingGemma-WalkLM, raw \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The LD feature is external released data. The product text and pretrained
+EmbeddingGemma model are also external data, so the method must be submitted
+with \emph{External data: Yes}.
+
+\subsection{EmbeddingGemma-WalkLM extraction}
+
+Directed random walks are sampled independently for every node with seed 42.
+Four walks of length four are generated. Each visited product contributes the
+first 160 characters of its released text, and visited nodes are separated by
+the token ``cites.'' Text is tokenized to at most 160 tokens. The final hidden
+state of \texttt{google/embeddinggemma-300m} is mean pooled with the attention
+mask and L2 normalized. The encoder is not fine-tuned. Batch size is four.
+The recovered command is:
+
+\begin{verbatim}
+PYTHONPATH=. python -u walklm.py \
+  --dataset ogbn-products \
+  --hf_model google/embeddinggemma-300m \
+  --encoder_type auto_model --pooling mean \
+  --normalize_embeddings --mlm_epochs 0 --epochs 1 \
+  --batch_size 4 --num_walks 4 --walk_length 4 \
+  --max_length 160 --max_text_chars 160 \
+  --use_raw_features --save_embeddings
+\end{verbatim}
+
+The artifact is a PyTorch dictionary containing \texttt{walklm\_x} and
+\texttt{raw\_x}. Its recorded size is 8,503,030,973 bytes and SHA-256 is
+\texttt{fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90}.
+A standalone, label-free preservation of this path is provided in
+\texttt{scripts/generate\_embeddinggemma\_features.py}.
+
+\subsection{SAGN/SLE and post-processing}
+
+The final predictor uses two feature-propagation hops, nine label-propagation
+hops, 512 hidden channels, one attention head, learning rate 0.001, batch size
+50,000, and dropout values 0.5/0.4/0.2/0.5 for model, attention, input, and
+label paths. Four self-training stages run for 300, 100, 100, and 100 epochs
+with thresholds 0.95, 0.95, and 0.999. Feature propagation is split into four
+CPU-memory chunks. Each seed is post-processed with 50 correction and 50
+smoothing iterations, DAD normalization, correction alpha 0.30, smoothing
+alpha 0.65, and scale 25.
+
+Only training labels are passed to SAGN/SLE label features and C\&S. Validation
+labels are used for early stopping/evaluation. The implementation does not
+feed validation or test labels into propagation.
+
+\section{Results}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Evaluation & Train & Validation & Test \\
+\midrule
+Stage 3 before C\&S & $0.958059\pm0.000949$ & $0.938901\pm0.000271$ & $0.872624\pm0.000492$ \\
+After C\&S & $0.984537\pm0.000081$ & $0.940010\pm0.000299$ & $0.874753\pm0.000487$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The final test mean is 0.001053 above the 0.8737 public leaderboard entry
+visible on September 3, 2026. This numerical comparison is not an official
+rank and does not override the protocol limitation in Section~\ref{sec:audit}.
+
+\section{Parameter accounting}
+
+Following OGB's multi-stage counting rule, we conservatively sum all learned
+feature-generation and prediction components:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Component & Parameters \\
+\midrule
+LD \texttt{bert-base-uncased} encoder & 109,482,240 \\
+LD SAGN/SLE head and aggregation weight & 1,154,656 \\
+EmbeddingGemma encoder & 307,581,696 \\
+Final 1,636-input SAGN/SLE predictor & 5,010,014 \\
+Correct \& Smooth & 0 \\
+\midrule
+Total & 423,228,606 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The first two rows sum to OGB's published 110,636,896 parameter count for the
+LD+SAGN products entry. The final SAGN count is the runtime count printed by
+every preserved training log.
+
+\section{Reproducibility}
+
+The repository pins SAGN, LD, and WalkLM revisions; includes a validated patch
+for the 1,636-dimensional feature integration; archives exact training and
+C\&S commands; preserves per-seed evaluator outputs; and links a release with
+all ten final prediction tensors, training logs, and checkpoint hashes. The
+EmbeddingGemma checksum is recovered. The byte size and SHA-256 of the released
+LD tensor remain to be captured on a host holding that file.
+
+\section{Protocol audit}\label{sec:audit}
+
+The experiment history shows two forms of test-aware selection. First, several
+text encoders were screened by reporting OGB test-split accuracy on a
+725,745-node subset before EmbeddingGemma was selected for the full graph.
+Second, C\&S candidates were explicitly compared and sorted by test accuracy.
+The recorded setting (0.30, 0.65, 25) was retained during this exploration.
+This conflicts with the OGB rule that test labels are for final evaluation.
+
+The repository therefore marks \texttt{leaderboard\_eligible\_as\_recorded}
+as false and includes a validation-only C\&S grid and locking utility for
+future work. That utility does not retroactively erase prior test feedback.
+A submission should proceed only after disclosing this history to OGB and
+receiving a favorable ruling, or after developing a clean, pre-registered
+method whose choices use validation results only.
+
+\section{Conclusion}
+
+The preserved ten-seed experiment is numerically competitive and substantially
+more reproducible than the original ad hoc run. Its scientific value is as an
+exploratory result and artifact package. The remaining barrier to an official
+leaderboard claim is experimental protocol, not the arithmetic or checkpoint
+record.
+
+\section*{References}
+
+\begin{enumerate}
+\item W. Hu et al. Open Graph Benchmark: Datasets for Machine Learning on Graphs. NeurIPS 2020. \url{https://ogb.stanford.edu/}
+\item C. Sun et al. Scalable and Adaptive Graph Neural Networks with Self-Label-Enhanced Training. \url{https://github.com/skepsun/SAGN_with_SLE}
+\item Z. Shi et al. Label Deconvolution for Node Representation Learning on Large-scale Attributed Graphs against Learning Bias. \url{https://arxiv.org/abs/2309.14907}
+\item Google. EmbeddingGemma documentation. \url{https://ai.google.dev/gemma/docs/embeddinggemma}
+\item Experiment code and artifacts. \url{https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm}
+\end{enumerate}
+
+\end{document}

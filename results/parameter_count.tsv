@@ -1,0 +1,7 @@
+component	parameters	counting_basis
+LD bert-base-uncased encoder	109482240	Hugging Face BertModel
+LD SAGN/SLE head and aggregation weight	1154656	Pinned LD products/SAGN configuration; matches the official LD leaderboard total when added to BERT
+EmbeddingGemma encoder	307581696	Official SentenceTransformer parameter count
+Final 1636-input SAGN/SLE predictor	5010014	Runtime # Params line in every recorded training log
+Correct & Smooth	0	Parameter-free propagation
+total	423228606	Sum of all multi-stage components

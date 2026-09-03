@@ -31,7 +31,7 @@ exec "${PYTHON_BIN}" -u "${HELPER}" \
     --dataset ogbn-products \
     --data-dir "${DATA_DIR}" \
     --probs_dir "${PROBS_DIR}" \
-    --gpu 0 \
+    --gpu -1 \
     --model sagn \
     --K 2 \
     --label-K 9 \

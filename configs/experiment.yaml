@@ -31,7 +31,20 @@ features:
       filename: walklm_products_2449029_embeddinggemma300m_walks4_len4_mean_norm_embeddings.pt
       expected_shape: [2449029, 768]
       dtype: float32
-      sha256: null
+      bytes: 8503030973
+      sha256: fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90
+  walklm_generation:
+    model: google/embeddinggemma-300m
+    encoder_type: auto_model
+    seed: 42
+    num_walks: 4
+    walk_length: 4
+    pooling: last_hidden_state_attention_masked_mean
+    normalize_embeddings: true
+    max_length: 160
+    max_text_chars: 160
+    batch_size: 4
+    mlm_epochs: 0
 
 training:
   model: sagn
@@ -65,6 +78,21 @@ correct_and_smooth:
   correction_adjacency: DAD
   smoothing_adjacency: DAD
   scale: 25
+  selection_status: test_aware_exploratory
+
+parameters:
+  ld_bert_encoder: 109482240
+  ld_sagn_sle_and_aggregation: 1154656
+  embeddinggemma_encoder: 307581696
+  final_sagn_sle: 5010014
+  correct_and_smooth: 0
+  multistage_total: 423228606
+
+protocol:
+  leaderboard_eligible_as_recorded: false
+  reason: test_metrics_were_viewed_during_model_and_postprocessing_selection
+  disclosure: TUNING_AND_PROTOCOL.md
+
 
 reporting:
   runs: 10

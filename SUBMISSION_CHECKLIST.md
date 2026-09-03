@@ -14,24 +14,33 @@
 - [x] Verify the 10 release assets against SHA-256 checksums.
 - [x] Record pinned source revisions and their provenance boundary.
 - [x] Preserve and validate the recovered 1,636-dimensional SAGN integration.
+- [x] Recover the exact EmbeddingGemma command and semantic generation code.
+- [x] Recover the EmbeddingGemma artifact byte size and SHA-256.
+- [x] Calculate the conservative multi-stage parameter count.
+- [x] Write a technical report and form-ready submission record.
+- [x] Preserve the tuning history and protocol audit.
+- [x] Add a validation-only C&S selection and configuration-locking workflow.
 
 ## Before submitting
 
-- [ ] Record SHA-256 hashes for the LD and EmbeddingGemma input tensors.
-- [ ] Preserve or link the two external input tensors outside Git.
-- [ ] Recover the exact EmbeddingGemma feature-generation command or script.
+- [ ] Record the LD input tensor byte size and SHA-256.
+- [ ] Preserve or link the LD tensor outside Git; the EmbeddingGemma artifact is
+      in the original WalkLM LFS commit.
 - [ ] Re-run the evaluator from downloaded release assets and compare its TSV
       byte-for-byte or numerically with `results/cs_per_seed.tsv`.
-- [ ] Choose the final method name and author list.
-- [ ] Prepare the concise method description and external-data disclosure.
-- [ ] Submit through the official OGB form.
+- [ ] Add a monitored contact email to `SUBMISSION.md`.
+- [ ] Disclose the test-aware selection history to OGB and obtain a ruling.
+- [ ] If required, run a clean, pre-registered validation-only experiment and
+      evaluate the test split once after locking the method.
+- [ ] Submit through the official OGB form only when protocol eligibility is
+      resolved.
 - [ ] Add the submission date and official leaderboard URL or status here.
 
-## Proposed method name
+## Proposed future method name
 
 `LD + EmbeddingGemma-WalkLM + Raw + SAGN/SLE + C&S`
 
-## Result to submit
+## Exploratory result (not currently eligible to submit)
 
 ```text
 Validation: 0.9400096636 ± 0.0002987397

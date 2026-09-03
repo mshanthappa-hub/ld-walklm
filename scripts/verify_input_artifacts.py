@@ -12,7 +12,14 @@ import torch
 
 EXPECTED = {
     "ld": {"shape": (2449029, 768), "key": "hidden_state"},
-    "walklm": {"shape": (2449029, 768), "key": "walklm_x"},
+    "walklm": {
+        "shape": (2449029, 768),
+        "key": "walklm_x",
+        "bytes": 8503030973,
+        "sha256": (
+            "fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90"
+        ),
+    },
 }
 
 
@@ -55,8 +62,22 @@ def inspect(role, path):
 
     checksum = sha256_file(path)
     tensor = load_tensor(path, spec["key"])
+    expected_bytes = spec.get("bytes")
+    if expected_bytes is not None and path.stat().st_size != expected_bytes:
+        raise ValueError(
+            "{} size is {}; expected {}".format(
+                role, path.stat().st_size, expected_bytes
+            )
+        )
+    expected_checksum = spec.get("sha256")
+    if expected_checksum is not None and checksum != expected_checksum:
+        raise ValueError(
+            "{} SHA-256 is {}; expected {}".format(
+                role, checksum, expected_checksum
+            )
+        )
     shape = tuple(tensor.shape)
-    dtype = str(tensor.dtype).removeprefix("torch.")
+    dtype = str(tensor.dtype).replace("torch.", "", 1)
     if shape != spec["shape"]:
         raise ValueError(
             "{} shape is {}; expected {}".format(role, shape, spec["shape"])
@@ -73,6 +94,11 @@ def inspect(role, path):
         "sha256": checksum,
         "shape": "x".join(str(item) for item in shape),
         "dtype": dtype,
+        "status": (
+            "verified_against_archived_checksum"
+            if expected_checksum is not None
+            else "locally_computed"
+        ),
     }
     del tensor
     gc.collect()
@@ -90,9 +116,11 @@ def main():
     args = parser.parse_args()
 
     rows = [inspect("ld", args.ld), inspect("walklm", args.walklm)]
-    header = "role\tfilename\tbytes\tsha256\tshape\tdtype"
+    header = "role\tfilename\tbytes\tshape\tdtype\tsha256\tstatus"
     body = [
-        "{role}\t{filename}\t{bytes}\t{sha256}\t{shape}\t{dtype}".format(**row)
+        "{role}\t{filename}\t{bytes}\t{shape}\t{dtype}\t{sha256}\t{status}".format(
+            **row
+        )
         for row in rows
     ]
     report = "\n".join([header] + body) + "\n"

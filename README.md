@@ -4,6 +4,15 @@ Reproducibility and submission evidence for a 10-seed `ogbn-products`
 node-classification experiment using language-derived features with SAGN/SLE
 and Correct & Smooth (C&S).
 
+
+> [!IMPORTANT]
+>
+> The recorded 87.4753% test result is exploratory, not currently eligible
+> for OGB submission, because test scores were viewed during method and C&S
+> selection. See [TUNING_AND_PROTOCOL.md](TUNING_AND_PROTOCOL.md) and the
+> [submission record](SUBMISSION.md).
+
+
 ## Final result
 
 Official OGB split, seeds `0..9`. Values are accuracy mean ± unbiased sample
@@ -12,7 +21,7 @@ standard deviation (`ddof=1`) across 10 independent runs.
 | Evaluation | Train | Validation | Test |
 |---|---:|---:|---:|
 | Stage 3, before C&S | 0.958059 ± 0.000949 | 0.938901 ± 0.000271 | 0.872624 ± 0.000492 |
-| After tuned C&S | **0.984537 ± 0.000081** | **0.940010 ± 0.000299** | **0.874753 ± 0.000487** |
+| After selected C&S (exploratory) | **0.984537 ± 0.000081** | **0.940010 ± 0.000299** | **0.874753 ± 0.000487** |
 
 Percentage form:
 
@@ -20,11 +29,13 @@ Percentage form:
 - Test: **87.4753% ± 0.0487%**
 
 The point test mean is 0.001053 (0.1053 percentage points) above the 0.8737
-reference result recorded from the OGB leaderboard on 2026-09-03. This is an
-experimental result, not an official rank, until it is submitted and accepted
-by OGB. See the
-[official leaderboard](https://ogb.stanford.edu/docs/leader_nodeprop/) and
-[submission rules](https://ogb.stanford.edu/docs/leader_overview/).
+reference result recorded from the OGB leaderboard on 2026-09-03. It is not an
+official rank. More importantly, the recovered history shows test-aware method
+selection, so this result must not be submitted as protocol-compliant without
+an explicit OGB ruling or a clean experiment. See the
+[official leaderboard](https://ogb.stanford.edu/docs/leader_nodeprop/),
+[submission requirements](https://ogb.stanford.edu/docs/leader_overview/), and
+[experimental protocol](https://ogb.stanford.edu/docs/leader_rules/).
 
 ## Method
 
@@ -51,9 +62,9 @@ Implementations used:
 - [LD](https://github.com/MIRALab-USTC/LD)
 - [SAGN_with_SLE](https://github.com/skepsun/SAGN_with_SLE)
 
-Exact source revisions, the recovered integration patch, and the remaining
-feature-generation provenance gap are documented in
-[`PROVENANCE.md`](PROVENANCE.md).
+Exact source revisions, the recovered integration patch and generation command,
+the artifact boundary, and the protocol audit are documented in
+[`PROVENANCE.md`](PROVENANCE.md) and [`TUNING_AND_PROTOCOL.md`](TUNING_AND_PROTOCOL.md).
 
 ## Dataset
 
@@ -113,6 +124,10 @@ The machine-readable configuration is in
   idempotent patch installer.
 - [`scripts/verify_input_artifacts.py`](scripts/verify_input_artifacts.py):
   shape, dtype, byte-size, and SHA-256 verifier for the two input tensors.
+- [`scripts/generate_embeddinggemma_features.py`](scripts/generate_embeddinggemma_features.py):
+  preserved label-free generator for the exact EmbeddingGemma WalkLM settings.
+- [`results/parameter_count.tsv`](results/parameter_count.tsv): conservative
+  OGB multi-stage parameter accounting.
 - [`requirements-reproduction.txt`](requirements-reproduction.txt): Python
   dependencies, with the recorded PyTorch build documented separately.
 - [`results/cs_per_seed.tsv`](results/cs_per_seed.tsv): evaluator values for
@@ -134,6 +149,14 @@ The machine-readable configuration is in
   invocation matching the recorded experiment.
 - [`SUBMISSION_CHECKLIST.md`](SUBMISSION_CHECKLIST.md): remaining steps for an
   official OGB submission.
+- [`report/technical_report.pdf`](report/technical_report.pdf): concise method,
+  result, reproducibility, and protocol report.
+- [`TUNING_AND_PROTOCOL.md`](TUNING_AND_PROTOCOL.md): full tuning disclosure
+  and the controlling leaderboard-eligibility status.
+- [`SUBMISSION.md`](SUBMISSION.md): form-ready metadata and remaining actions.
+- [`scripts/tune_cs_validation_only.sh`](scripts/tune_cs_validation_only.sh):
+  validation-only C&S grid and auditable configuration lock for future work.
+
 
 ## Checkpoints and logs
 
@@ -144,6 +167,21 @@ The release contains all 10 stage-3 tensors (460,419,711 bytes each), their
 SHA-256 hashes, per-seed training logs, the raw result table, environment
 record, and checkpoint manifest. It is linked instead of duplicated here to
 avoid storing another copy of approximately 4.6 GB.
+
+## Reproducing EmbeddingGemma features
+
+The exact recovered feature settings are preserved in a standalone script.
+On a high-memory host with the OGB data and product text available:
+
+```bash
+export DATA_DIR=/path/to/OGB
+export PYTHON_BIN=/path/to/python
+export OUTPUT=/path/to/walklm_products_2449029_embeddinggemma300m_walks4_len4_mean_norm_embeddings.pt
+bash scripts/run_embeddinggemma_generation.sh
+```
+
+The script prints a SHA-256 and whether the serialized output matches the
+archived container checksum. See `PROVENANCE.md` for version limitations.
 
 ## Reproducing training
 
@@ -191,13 +229,16 @@ The script requires exactly 10 non-empty stage-3 checkpoints and writes a
 fresh per-seed TSV before calculating the mean and unbiased sample standard
 deviation.
 
-## Reproducibility status
+## Reproducibility and submission status
 
-The final checkpoints, logs, hashes, environment, evaluator outputs, training
-arguments, C&S arguments, pinned source revisions, and recovered SAGN feature
-integration are preserved.
+The final checkpoints, logs, checkpoint hashes, environment, evaluator
+outputs, training and C&S arguments, pinned revisions, SAGN integration, exact
+EmbeddingGemma command, and EmbeddingGemma artifact checksum are preserved.
+The LD tensor's byte size and SHA-256 still need to be recorded on a host that
+holds the released file.
 
-The two input-tensor SHA-256 hashes and the exact EmbeddingGemma generation
-command are still outstanding. See [`PROVENANCE.md`](PROVENANCE.md); this
-boundary is intentionally explicit so the repository does not overclaim
-end-to-end feature-generation reproducibility.
+The 423,228,606-parameter multi-stage count and technical report are included.
+However, the recovered test-aware tuning history is a substantive OGB protocol
+blocker. The current score is an exploratory research result, not a
+submission-ready leaderboard claim. Follow `SUBMISSION.md` and
+`TUNING_AND_PROTOCOL.md`; do not omit that disclosure.
