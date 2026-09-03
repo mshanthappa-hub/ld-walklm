@@ -1,0 +1,309 @@
+From 7ed43a6fde534045d011a9a4f4c5192c5214d03a Mon Sep 17 00:00:00 2001
+From: MeghanaShanthappa <29868367+MeghanaShanthappa@users.noreply.github.com>
+Date: Thu, 3 Sep 2026 13:59:58 -0700
+Subject: [PATCH] Add LD and EmbeddingGemma feature integration
+
+---
+ src/dataset.py       |  8 +++++
+ src/feature_stack.py | 83 ++++++++++++++++++++++++++++++++++++++++++++
+ src/pre_process.py   | 45 ++++++++++++++++++++----
+ src/sagn.py          |  6 ++--
+ src/train_process.py | 24 ++++++-------
+ 5 files changed, 144 insertions(+), 22 deletions(-)
+ create mode 100644 src/feature_stack.py
+
+diff --git a/src/dataset.py b/src/dataset.py
+index f58449a..b2401e1 100644
+--- a/src/dataset.py
++++ b/src/dataset.py
+@@ -13,6 +13,8 @@ import json
+ 
+ from networkx.readwrite import json_graph
+ 
++from feature_stack import load_products_feature_stack
++
+ 
+ def get_ogb_evaluator(dataset):
+     """
+@@ -166,6 +168,12 @@ def load_dataset(device, args):
+         
+         else:
+             g.ndata['feat'] = g.ndata['feat'].float()
++            if args.dataset == "ogbn-products":
++                g.ndata['feat'] = load_products_feature_stack(
++                    g.ndata['feat']
++                ).to(device)
++                print("Using LD + Gemma-WalkLM + raw features:",
++                      tuple(g.ndata['feat'].shape))
+ 
+         labels = labels.squeeze()
+ 
+diff --git a/src/feature_stack.py b/src/feature_stack.py
+new file mode 100644
+index 0000000..89799c3
+--- /dev/null
++++ b/src/feature_stack.py
+@@ -0,0 +1,83 @@
++"""Load the exact ogbn-products feature stack used by this experiment."""
++
++import os
++from pathlib import Path
++
++import torch
++
++
++EXPECTED_ROWS = 2449029
++EXPECTED_DIMS = {
++    "ld": 768,
++    "walklm": 768,
++    "raw": 100,
++}
++
++
++def _load_local_tensor(path, preferred_key=None):
++    """Load a trusted local tensor (or a one-tensor checkpoint dictionary)."""
++    path = Path(path).expanduser().resolve()
++    if not path.is_file():
++        raise FileNotFoundError("Feature tensor not found: {}".format(path))
++
++    try:
++        value = torch.load(str(path), map_location="cpu", weights_only=True)
++    except TypeError:
++        # PyTorch versions before weights_only was added.
++        value = torch.load(str(path), map_location="cpu")
++
++    if isinstance(value, dict):
++        if preferred_key in value:
++            value = value[preferred_key]
++        else:
++            tensors = [item for item in value.values() if torch.is_tensor(item)]
++            if len(tensors) != 1:
++                raise ValueError(
++                    "Expected one tensor in {}, found keys {}".format(
++                        path, sorted(value.keys())
++                    )
++                )
++            value = tensors[0]
++
++    if not torch.is_tensor(value):
++        raise TypeError("{} did not contain a torch.Tensor".format(path))
++    return value.detach().cpu().float().contiguous()
++
++
++def _validate(name, value, columns):
++    expected = (EXPECTED_ROWS, columns)
++    if tuple(value.shape) != expected:
++        raise ValueError(
++            "{} has shape {}; expected {}".format(name, tuple(value.shape), expected)
++        )
++    if value.dtype != torch.float32:
++        raise TypeError("{} has dtype {}; expected float32".format(name, value.dtype))
++
++
++def load_products_feature_stack(raw_features, ld_path=None, walklm_path=None):
++    """Return [LD BERT, EmbeddingGemma WalkLM, raw OGB] in that order.
++
++    Paths default to the LD_FEATURE_PATH and WALKLM_FEATURE_PATH environment
++    variables. Tensor files must be trusted because older PyTorch versions
++    may use pickle-backed torch.load behavior.
++    """
++    ld_path = ld_path or os.environ.get("LD_FEATURE_PATH")
++    walklm_path = walklm_path or os.environ.get("WALKLM_FEATURE_PATH")
++    if not ld_path or not walklm_path:
++        raise RuntimeError(
++            "Set LD_FEATURE_PATH and WALKLM_FEATURE_PATH to the two input tensors"
++        )
++
++    raw = raw_features.detach().cpu().float().contiguous()
++    ld = _load_local_tensor(ld_path, preferred_key="hidden_state")
++    walklm = _load_local_tensor(walklm_path, preferred_key="walklm_x")
++
++    _validate("LD hidden state", ld, EXPECTED_DIMS["ld"])
++    _validate("EmbeddingGemma WalkLM", walklm, EXPECTED_DIMS["walklm"])
++    _validate("raw OGB features", raw, EXPECTED_DIMS["raw"])
++
++    combined = torch.cat([ld, walklm, raw], dim=1)
++    expected_columns = sum(EXPECTED_DIMS.values())
++    if tuple(combined.shape) != (EXPECTED_ROWS, expected_columns):
++        raise AssertionError("Unexpected combined shape: {}".format(combined.shape))
++    return combined
+diff --git a/src/pre_process.py b/src/pre_process.py
+index c883af5..bdfca37 100644
+--- a/src/pre_process.py
++++ b/src/pre_process.py
+@@ -16,6 +16,17 @@ from dataset import load_dataset
+ from utils import (calculate_homophily, clear_memory,
+                    entropy, inner_distance, outer_distance)
+ 
++# Compatibility with DGL versions that renamed copy_src/copy_edge.
++if not hasattr(fn, "copy_src") and hasattr(fn, "copy_u"):
++    def _copy_src(src=None, out=None, **kwargs):
++        return fn.copy_u(src, out)
++    fn.copy_src = _copy_src
++
++if not hasattr(fn, "copy_edge") and hasattr(fn, "copy_e"):
++    def _copy_edge(edge=None, out=None, **kwargs):
++        return fn.copy_e(edge, out)
++    fn.copy_edge = _copy_edge
++
+ 
+ def neighbor_average_features_by_chunks(g, feat, args, style="all", stats=False, memory_efficient=False, target_nid=None):
+     """
+@@ -25,6 +36,8 @@ def neighbor_average_features_by_chunks(g, feat, args, style="all", stats=False,
+         return neighbor_average_features(g, feat, args, style=style, stats=stats, memory_efficient=memory_efficient, target_nid=target_nid)
+     aggr_device = torch.device("cpu" if args.aggr_gpu < 0 else "cuda:{}".format(args.aggr_gpu))
+     feat_size = feat.shape[1]
++    num_nodes = feat.shape[0]
++    feat_dtype = feat.dtype
+     chunk_size = int(math.ceil(feat_size / args.chunks))
+     
+     print("Saving temporary initial feature chunks……")
+@@ -41,20 +54,31 @@ def neighbor_average_features_by_chunks(g, feat, args, style="all", stats=False,
+     clear_memory(aggr_device)
+     print("Perform feature propagation by chunks……")
+     for part, i in enumerate(tqdm.tqdm(range(0, feat_size, chunk_size))):
+-        chunk = torch.from_numpy(np.load(os.path.join(tmp_dir, f"feat_{i}.npy"))).to(aggr_device)
++        chunk = torch.from_numpy(np.load(os.path.join(tmp_dir, f"feat_{part}.npy"))).to(aggr_device)
+         out_chunk = neighbor_average_features(g, chunk, args, style=style, stats=stats, memory_efficient=memory_efficient)
+         if style=="all":
+-            chunk = [c.cpu().numpy() for c in chunk]
++            out_chunk = [c.cpu().numpy() for c in out_chunk]
+         else:
+-            chunk = chunk.cpu().numpy()
++            out_chunk = out_chunk.cpu().numpy()
+         np.save(os.path.join(tmp_dir, f"smoothed_feat_{part}.npy"), out_chunk)
+     del chunk
+     clear_memory(aggr_device)
+     print("Loading aggregated chunks……")
+     if style=="all":
+-        out_feat = [torch.empty_like(feat, device=aggr_device) for k in range(args.K+1)]  
++        out_feat = [
++            torch.empty(
++                (num_nodes, feat_size),
++                dtype=feat_dtype,
++                device=aggr_device,
++            )
++            for _ in range(args.K + 1)
++        ]
+     else:
+-        out_feat = torch.empty_like(feat, device=aggr_device)
++        out_feat = torch.empty(
++            (num_nodes, feat_size),
++            dtype=feat_dtype,
++            device=aggr_device,
++        )
+     for part, i in enumerate(tqdm.tqdm(range(0, feat_size, chunk_size))):
+         out_chunk = torch.from_numpy(np.load(os.path.join(tmp_dir, f"smoothed_feat_{part}.npy"))).to(aggr_device)
+         if style == "all":
+@@ -64,8 +88,15 @@ def neighbor_average_features_by_chunks(g, feat, args, style="all", stats=False,
+             out_feat[:, i: min(i+chunk_size, feat_size)] = out_chunk
+     print("Removing temporary files……")
+     for part, i in enumerate(tqdm.tqdm(range(0, feat_size, chunk_size))):
+-        # os.remove(os.path.join(tmp_dir, f"feat_{i}.pt"))
+-        os.remove(os.path.join(tmp_dir, f"smoothed_feat_{part}.pt"))
++        feat_path = os.path.join(tmp_dir, f"feat_{part}.npy")
++        smoothed_path = os.path.join(
++            tmp_dir,
++            f"smoothed_feat_{part}.npy",
++        )
++        if os.path.exists(feat_path):
++            os.remove(feat_path)
++        if os.path.exists(smoothed_path):
++            os.remove(smoothed_path)
+     del out_chunk
+     clear_memory(aggr_device)
+     return out_feat
+diff --git a/src/sagn.py b/src/sagn.py
+index b767a75..2ee791b 100644
+--- a/src/sagn.py
++++ b/src/sagn.py
+@@ -121,11 +121,11 @@ def run(args, data, device, stage=0, subset_list=None):
+             attn_weights = None
+         for batch in test_loader:
+             if args.dataset == "ogbn-mag":
+-                batch_feats = {rel_subset: [x[batch].to(device) for x in feat] for rel_subset, feat in feats.items()}
++                batch_feats = {rel_subset: [x[batch.cpu()].to(device) for x in feat] for rel_subset, feat in feats.items()}
+             else:
+-                batch_feats = [x[batch].to(device) for x in feats] if isinstance(feats, list) else feats[batch].to(device)
++                batch_feats = [x[batch.cpu()].to(device) for x in feats] if isinstance(feats, list) else feats[batch.cpu()].to(device)
+             if label_emb is not None:
+-                batch_label_emb = label_emb[batch].to(device)
++                batch_label_emb = label_emb[batch.cpu()].to(device)
+             else:
+                 batch_label_emb = None
+             if (args.model in ["sagn", "plain_sagn"]) and (not args.avoid_features):
+diff --git a/src/train_process.py b/src/train_process.py
+index 340ebee..513a7c9 100644
+--- a/src/train_process.py
++++ b/src/train_process.py
+@@ -15,11 +15,11 @@ def train(model, feats, label_emb, teacher_probs, labels, loss_fcn, optimizer, t
+         if len(batch) == 1:
+             continue
+         if args.dataset == "ogbn-mag":
+-            batch_feats = {rel_subset: [x[batch].to(device) for x in feat] for rel_subset, feat in feats.items()}
++            batch_feats = {rel_subset: [x[batch.cpu()].to(device) for x in feat] for rel_subset, feat in feats.items()}
+         else:
+-            batch_feats = [x[batch].to(device) for x in feats] if isinstance(feats, list) else feats[batch].to(device)
++            batch_feats = [x[batch.cpu()].to(device) for x in feats] if isinstance(feats, list) else feats[batch.cpu()].to(device)
+         if label_emb is not None:
+-            batch_label_emb = label_emb[batch].to(device)
++            batch_label_emb = label_emb[batch.cpu()].to(device)
+         else:
+             batch_label_emb = None
+         
+@@ -27,11 +27,11 @@ def train(model, feats, label_emb, teacher_probs, labels, loss_fcn, optimizer, t
+             out, _ = model(batch_feats, batch_label_emb)
+         else:
+             out = model(batch_feats, batch_label_emb)
+-        loss = loss_fcn(out, labels[batch])
++        loss = loss_fcn(out, labels[batch.cpu()])
+         # T = 0.5
+         # alpha = 0.5
+         # if teacher_probs is not None:
+-        #     loss = (1-alpha) * loss + alpha * F.kl_div(F.log_softmax(out, dim=-1) / T, teacher_probs[batch] / T) * (T * T)
++        #     loss = (1-alpha) * loss + alpha * F.kl_div(F.log_softmax(out, dim=-1) / T, teacher_probs[batch.cpu()] / T) * (T * T)
+         optimizer.zero_grad()
+         loss.backward()
+         optimizer.step()
+@@ -47,11 +47,11 @@ def test(model, feats, label_emb, teacher_probs, labels, loss_fcn, val_loader, t
+     preds = []
+     for batch in val_loader:
+         if args.dataset == "ogbn-mag":
+-            batch_feats = {rel_subset: [x[batch].to(device) for x in feat] for rel_subset, feat in feats.items()}
++            batch_feats = {rel_subset: [x[batch.cpu()].to(device) for x in feat] for rel_subset, feat in feats.items()}
+         else:
+-            batch_feats = [x[batch].to(device) for x in feats] if isinstance(feats, list) else feats[batch].to(device)
++            batch_feats = [x[batch.cpu()].to(device) for x in feats] if isinstance(feats, list) else feats[batch.cpu()].to(device)
+         if label_emb is not None:
+-            batch_label_emb = label_emb[batch].to(device)
++            batch_label_emb = label_emb[batch.cpu()].to(device)
+         else:
+             batch_label_emb = None
+         # We can get attention scores from SAGN
+@@ -59,7 +59,7 @@ def test(model, feats, label_emb, teacher_probs, labels, loss_fcn, val_loader, t
+             out, _ = model(batch_feats, batch_label_emb)
+         else:
+             out = model(batch_feats, batch_label_emb)
+-        loss_list.append(loss_fcn(out, labels[batch]).cpu().item())
++        loss_list.append(loss_fcn(out, labels[batch.cpu()]).cpu().item())
+         count_list.append(len(batch))
+     loss_list = np.array(loss_list)
+     count_list = np.array(count_list)
+@@ -67,11 +67,11 @@ def test(model, feats, label_emb, teacher_probs, labels, loss_fcn, val_loader, t
+     start = time.time()
+     for batch in test_loader:
+         if args.dataset == "ogbn-mag":
+-            batch_feats = {rel_subset: [x[batch].to(device) for x in feat] for rel_subset, feat in feats.items()}
++            batch_feats = {rel_subset: [x[batch.cpu()].to(device) for x in feat] for rel_subset, feat in feats.items()}
+         else:
+-            batch_feats = [x[batch].to(device) for x in feats] if isinstance(feats, list) else feats[batch].to(device)
++            batch_feats = [x[batch.cpu()].to(device) for x in feats] if isinstance(feats, list) else feats[batch.cpu()].to(device)
+         if label_emb is not None:
+-            batch_label_emb = label_emb[batch].to(device)
++            batch_label_emb = label_emb[batch.cpu()].to(device)
+         else:
+             batch_label_emb = None
+         if (args.model in ["sagn", "plain_sagn"]) and (not args.avoid_features):
+-- 
+2.39.3
+

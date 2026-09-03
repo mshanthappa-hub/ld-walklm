@@ -51,6 +51,10 @@ Implementations used:
 - [LD](https://github.com/MIRALab-USTC/LD)
 - [SAGN_with_SLE](https://github.com/skepsun/SAGN_with_SLE)
 
+Exact source revisions, the recovered integration patch, and the remaining
+feature-generation provenance gap are documented in
+[`PROVENANCE.md`](PROVENANCE.md).
+
 ## Dataset
 
 | Item | Value |
@@ -99,6 +103,18 @@ The machine-readable configuration is in
 
 ## Repository contents
 
+- [`PROVENANCE.md`](PROVENANCE.md): pinned revisions, feature origin, and the
+  explicitly documented reproducibility boundary.
+- [`integration/0001-Add-LD-and-EmbeddingGemma-feature-integration.patch`](integration/0001-Add-LD-and-EmbeddingGemma-feature-integration.patch):
+  validated patch for the pinned SAGN source tree.
+- [`artifacts/input_manifest.tsv`](artifacts/input_manifest.tsv): expected
+  external input tensor metadata and checksum status.
+- [`scripts/apply_sagn_patch.sh`](scripts/apply_sagn_patch.sh): guarded,
+  idempotent patch installer.
+- [`scripts/verify_input_artifacts.py`](scripts/verify_input_artifacts.py):
+  shape, dtype, byte-size, and SHA-256 verifier for the two input tensors.
+- [`requirements-reproduction.txt`](requirements-reproduction.txt): Python
+  dependencies, with the recorded PyTorch build documented separately.
 - [`results/cs_per_seed.tsv`](results/cs_per_seed.tsv): evaluator values for
   every seed before and after C&S.
 - [`results/summary.tsv`](results/summary.tsv): aggregate means and unbiased
@@ -129,6 +145,33 @@ SHA-256 hashes, per-seed training logs, the raw result table, environment
 record, and checkpoint manifest. It is linked instead of duplicated here to
 avoid storing another copy of approximately 4.6 GB.
 
+## Reproducing training
+
+Start from the exact SAGN base and apply the packaged integration patch:
+
+```bash
+git clone https://github.com/skepsun/SAGN_with_SLE.git
+git -C SAGN_with_SLE checkout 08fe607ed7f31ca39740a44ce2f139565de3c595
+bash scripts/apply_sagn_patch.sh /path/to/SAGN_with_SLE
+```
+
+Install `requirements-reproduction.txt` plus a PyTorch build suitable for
+the target GPU, then point the runner at the two trusted feature tensors:
+
+```bash
+export SAGN_ROOT=/path/to/SAGN_with_SLE
+export PYTHON_BIN=/path/to/python
+export DATA_DIR=/path/to/OGB
+export PROBS_DIR=/path/to/intermediate_outputs
+export LD_FEATURE_PATH=/path/to/products_sagn/hidden_state.pt
+export WALKLM_FEATURE_PATH=/path/to/walklm_products_2449029_embeddinggemma300m_walks4_len4_mean_norm_embeddings.pt
+
+bash scripts/run_10_seeds.sh
+```
+
+Validate and hash those tensors with `scripts/verify_input_artifacts.py`
+before launching training.
+
 ## Reproducing C&S
 
 Install the versions recorded in `results/environment.txt`, clone
@@ -151,6 +194,10 @@ deviation.
 ## Reproducibility status
 
 The final checkpoints, logs, hashes, environment, evaluator outputs, training
-arguments, and C&S arguments are archived. Before an official submission, the
-exact Git commit IDs for WalkLM, LD, SAGN_with_SLE, and the feature-generation
-code used to build the 1,636-dimensional input should also be recorded.
+arguments, C&S arguments, pinned source revisions, and recovered SAGN feature
+integration are preserved.
+
+The two input-tensor SHA-256 hashes and the exact EmbeddingGemma generation
+command are still outstanding. See [`PROVENANCE.md`](PROVENANCE.md); this
+boundary is intentionally explicit so the repository does not overclaim
+end-to-end feature-generation reproducibility.

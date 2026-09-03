@@ -4,6 +4,9 @@ set -euo pipefail
 : "${SAGN_ROOT:?Set SAGN_ROOT to the feature-integrated SAGN checkout}"
 : "${DATA_DIR:?Set DATA_DIR to the OGB dataset directory}"
 : "${PROBS_DIR:?Set PROBS_DIR to the intermediate_outputs directory}"
+: "${LD_FEATURE_PATH:?Set LD_FEATURE_PATH to products_sagn/hidden_state.pt}"
+: "${WALKLM_FEATURE_PATH:?Set WALKLM_FEATURE_PATH to the EmbeddingGemma tensor}"
+export LD_FEATURE_PATH WALKLM_FEATURE_PATH
 
 PYTHON_BIN=${PYTHON_BIN:-python}
 OUTPUT_DIR="${PROBS_DIR}/ogbn-products/sagn"

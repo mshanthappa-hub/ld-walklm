@@ -12,12 +12,14 @@
 - [x] Declare external data: **Yes**.
 - [x] Archive all 10 final tensors, logs, hashes, and environment details.
 - [x] Verify the 10 release assets against SHA-256 checksums.
+- [x] Record pinned source revisions and their provenance boundary.
+- [x] Preserve and validate the recovered 1,636-dimensional SAGN integration.
 
 ## Before submitting
 
-- [ ] Record exact Git commit IDs for WalkLM, LD, and SAGN_with_SLE.
-- [ ] Archive or document the exact feature-generation integration that
-      produced the 1,636-dimensional input.
+- [ ] Record SHA-256 hashes for the LD and EmbeddingGemma input tensors.
+- [ ] Preserve or link the two external input tensors outside Git.
+- [ ] Recover the exact EmbeddingGemma feature-generation command or script.
 - [ ] Re-run the evaluator from downloaded release assets and compare its TSV
       byte-for-byte or numerically with `results/cs_per_seed.tsv`.
 - [ ] Choose the final method name and author list.

@@ -9,12 +9,29 @@ dataset:
   test_nodes: 2213091
   classes: 47
 
+source_revisions:
+  sagn_upstream_base: 08fe607ed7f31ca39740a44ce2f139565de3c595
+  walklm_packaging_snapshot: bff59aae01855a21cbf10fde932ccf0ac7ff9aab
+  ld_snapshot: cf2804b08c1cb4453ca7950d9f20b3d3bc7a43e4
+
 external_data: true
 features:
   ld_bert_hidden_state: 768
   embeddinggemma_300m_walklm: 768
   raw_ogb: 100
   combined: 1636
+  concatenation_order: [ld_bert_hidden_state, embeddinggemma_300m_walklm, raw_ogb]
+  artifacts:
+    ld:
+      filename: hidden_state.pt
+      expected_shape: [2449029, 768]
+      dtype: float32
+      sha256: null
+    walklm:
+      filename: walklm_products_2449029_embeddinggemma300m_walks4_len4_mean_norm_embeddings.pt
+      expected_shape: [2449029, 768]
+      dtype: float32
+      sha256: null
 
 training:
   model: sagn
