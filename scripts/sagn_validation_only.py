@@ -150,4 +150,38 @@ if args.dataset != "ogbn-products":
 print("VALIDATION_ONLY_PROTOCOL: test-label values are masked and never evaluated")
 preprocessing.load_dataset = load_dataset_with_masked_test_labels
 upstream.test = validation_only_test
-upstream.main(args)
+try:
+    upstream.main(args)
+except ValueError as error:
+    # Pinned upstream appends per-stage validation histories with different
+    # lengths (300 vs. 100 epochs) and then asks NumPy to create a rectangular
+    # array. Newer NumPy versions reject that ragged reporting structure. The
+    # exception occurs only after the final probabilities have been saved.
+    model_directory = (
+        args.model
+        if args.weight_style == "attention"
+        else f"{args.model}_{args.weight_style}"
+    )
+    final_stage = len(args.epoch_setting) - 1
+    final_checkpoint = (
+        Path(args.probs_dir)
+        / args.dataset
+        / model_directory
+        / (
+            f"use_labels_{args.use_labels}_"
+            f"use_feats_{not args.avoid_features}_K_{args.K}_"
+            f"label_K_{args.label_K}_probs_seed_{args.seed}_"
+            f"stage_{final_stage}.pt"
+        )
+    )
+    known_reporting_error = "inhomogeneous shape" in str(error)
+    checkpoint_complete = (
+        final_checkpoint.is_file() and final_checkpoint.stat().st_size > 0
+    )
+    if not (known_reporting_error and checkpoint_complete):
+        raise
+    print(
+        "KNOWN_UPSTREAM_SUMMARY_BUG: ignored ragged NumPy conversion after "
+        f"verified final checkpoint {final_checkpoint} "
+        f"({final_checkpoint.stat().st_size} bytes)"
+    )
