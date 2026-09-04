@@ -12,8 +12,7 @@ Special thanks to Junhao Shen and Rishi Puri for their guidance on this project.
 > [!IMPORTANT]
 >
 > The validation-locked v2 result is **87.4984% ± 0.0490% test accuracy**.
-> This is a prospective Top-1 point estimate, not an official rank until OGB
-> reviews and accepts it. V2 prevents any test-driven choices after its
+> V2 prevents any test-driven choices after its
 > committed protocol boundary; the earlier v1 exploration remains disclosed in
 > [TUNING_AND_PROTOCOL.md](TUNING_AND_PROTOCOL.md).
 
