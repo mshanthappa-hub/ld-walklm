@@ -4,6 +4,10 @@ Reproducibility and submission evidence for a 10-seed `ogbn-products`
 node-classification experiment using language-derived features with SAGN/SLE
 and Correct & Smooth (C&S).
 
+## Acknowledgements
+
+Junhao Shen and Rishi Puri advised this project.
+
 
 > [!IMPORTANT]
 >
@@ -122,10 +126,6 @@ Validation-selected v2 C&S parameters:
 The primary machine-readable result is the committed validation lock and final
 JSON under [`results/v2/`](results/v2/). The archived v1 configuration remains
 in [`configs/experiment.yaml`](configs/experiment.yaml).
-
-## Acknowledgements
-
-Junhao Shen and Rishi Puri advised this project.
 
 ## Repository contents
 
