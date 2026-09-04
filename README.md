@@ -8,6 +8,22 @@ and Correct & Smooth (C&S).
 
 Special thanks to Junhao Shen and Rishi Puri for their guidance on this project.
 
+## How WalkLM improves the representation
+
+WalkLM turns local graph structure into language context. For every product
+node, four directed random walks of length four are rendered as text and
+encoded with `google/embeddinggemma-300m`. Attention-mask mean pooling and L2
+normalization produce a 768-dimensional vector that combines product semantics
+with information from its multi-hop graph neighborhood.
+
+We concatenate this WalkLM vector with 768-dimensional LD BERT features and
+the 100-dimensional raw OGB features. SAGN/SLE therefore receives a richer
+1,636-dimensional input before multi-stage training and Correct & Smooth. The
+complete pipeline reaches **87.4984% ± 0.0490%** test accuracy, compared with
+the public 87.3700% reference: an observed improvement of **0.1284 percentage
+points**. V2 did not include a WalkLM-only ablation, so this margin measures the
+full combined pipeline and cannot be attributed exclusively to WalkLM.
+
 
 > [!IMPORTANT]
 >
