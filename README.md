@@ -125,7 +125,7 @@ in [`configs/experiment.yaml`](configs/experiment.yaml).
 
 ## Acknowledgements
 
-Rishi Puri advised this project.
+Junhao Shen and Rishi Puri advised this project.
 
 ## Repository contents
 
