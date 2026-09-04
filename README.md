@@ -123,6 +123,10 @@ The primary machine-readable result is the committed validation lock and final
 JSON under [`results/v2/`](results/v2/). The archived v1 configuration remains
 in [`configs/experiment.yaml`](configs/experiment.yaml).
 
+## Acknowledgements
+
+Rishi Puri advised this project.
+
 ## Repository contents
 
 - [`PROVENANCE.md`](PROVENANCE.md): pinned revisions, feature origin, and the
