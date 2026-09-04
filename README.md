@@ -6,7 +6,7 @@ and Correct & Smooth (C&S).
 
 ## Acknowledgements
 
-Junhao Shen and Rishi Puri advised this project.
+Special thanks to Junhao Shen and Rishi Puri for their guidance on this project.
 
 
 > [!IMPORTANT]
