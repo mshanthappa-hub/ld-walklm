@@ -22,7 +22,7 @@ to accept the entry.
 | Validation performance | `0.9405843908 ± 0.0004332633` |
 | Runs | 10 independent seeds, 10 through 19 |
 | Standard deviation | Unbiased sample standard deviation (`ddof=1`) |
-| Contact | Meghana Shanthappa — **REQUIRED: add a monitored email address** |
+| Contact | Meghana Shanthappa — shanthappa.meghana@gmail.com |
 | Code | <https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm> |
 | Technical report | `report/technical_report.pdf` in the code repository |
 | Parameters | 423,228,606 conservative multi-stage total; see `results/parameter_count.tsv` |
