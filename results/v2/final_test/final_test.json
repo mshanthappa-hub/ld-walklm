@@ -1,0 +1,43 @@
+{
+  "dataset": "ogbn-products",
+  "seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "lock_sha256": "3d5f7ed1a2096dff5de4aeb45bbb83b1378c60aa43eeec2e926f206cca299f8d",
+  "selected_parameters": {
+    "correction_layers": 50,
+    "smoothing_layers": 50,
+    "correction_alpha": 0.35,
+    "smoothing_alpha": 0.6,
+    "correction_adjacency": "DAD",
+    "smoothing_adjacency": "DAD",
+    "scale": 20.0
+  },
+  "test_metrics_accessed": true,
+  "evaluation_scope": "post_correct_and_smooth_only",
+  "test": {
+    "per_seed": {
+      "10": 0.8751551562949739,
+      "11": 0.8747353814190199,
+      "12": 0.875673435931916,
+      "13": 0.8754036774809532,
+      "14": 0.8746459137920672,
+      "15": 0.8749070869656964,
+      "16": 0.8740268701106281,
+      "17": 0.8751483784444472,
+      "18": 0.8746599213498225,
+      "19": 0.8754877228274843
+    },
+    "mean": 0.874984354461701,
+    "std_unbiased": 0.0004904255484690718
+  }
+}
