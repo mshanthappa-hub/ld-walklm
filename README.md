@@ -283,8 +283,8 @@ committed `final_test.json` is the authoritative one-time v2 test record.
 
 The v2 validation grid, selected lock, access marker, final result, checkpoint
 hashes, size manifest, and environment record are preserved in Git. The public
-v2 release preserves all ten final tensors and the complete log bundle. A
-monitored contact email must still be added to `SUBMISSION.md`.
+v2 release preserves all ten final tensors and the complete log bundle. The
+submission record includes a monitored contact email.
 
 V2 establishes a forward test-isolated selection boundary. It does not erase
 that EmbeddingGemma and the fixed pipeline were informed by the earlier v1

@@ -69,6 +69,5 @@ All ten v2 stage-3 checkpoints, logs, hashes, and environment metadata are in:
 
 ## Remaining actions
 
-1. Add a monitored contact email.
-2. Send the repository/report and the protocol disclosure to OGB with the submission.
-3. Record the submission date and official status in this repository.
+1. Send the repository/report and the protocol disclosure to OGB with the submission.
+2. Record the submission date and official status in this repository.

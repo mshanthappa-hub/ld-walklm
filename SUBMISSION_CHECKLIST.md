@@ -18,11 +18,11 @@
 - [x] Record pinned sources, exact input tensor checksums, integration patch, parameter count, and environment.
 - [x] Write the technical report and form-ready submission record.
 - [x] Publish all ten v2 checkpoints, logs, hashes, and environment metadata in the v2 GitHub release.
+- [x] Add the monitored submission contact email.
 
 ## Before submitting
 
 - [ ] Re-run validation post-processing from downloaded v2 assets and compare it with the committed records.
-- [ ] Add a monitored contact email to `SUBMISSION.md`.
 - [ ] Include the concise historical protocol disclosure in the OGB submission.
 - [ ] Submit through the official OGB process.
 - [ ] Add the submission date and official leaderboard URL or decision here.
