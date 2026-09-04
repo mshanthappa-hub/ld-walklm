@@ -4,9 +4,11 @@ Reproducibility and submission evidence for a 10-seed `ogbn-products`
 node-classification experiment using language-derived features with SAGN/SLE
 and Correct & Smooth (C&S).
 
-## Acknowledgements
+## Authors
 
-Special thanks to Junhao Shen and Rishi Puri for their guidance on this project.
+- Meghana Shanthappa
+- Junhao Shen
+- Rishi Puri
 
 ## How WalkLM improves the representation
 
