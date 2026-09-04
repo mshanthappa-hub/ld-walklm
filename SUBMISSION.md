@@ -62,9 +62,13 @@ runs had shown test scores while comparing encoders and C&S settings; those
 runs informed the fixed EmbeddingGemma pipeline but no v2 choice was changed
 after its committed boundary. Full details are in `TUNING_AND_PROTOCOL.md`.
 
+## Artifact release
+
+All ten v2 stage-3 checkpoints, logs, hashes, and environment metadata are in:
+<https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904>
+
 ## Remaining actions
 
 1. Add a monitored contact email.
-2. Archive and link the v2 seeds 10–19 stage-3 checkpoints, logs, hashes, and environment record.
-3. Send the repository/report and the protocol disclosure to OGB with the submission.
-4. Record the submission date and official status in this repository.
+2. Send the repository/report and the protocol disclosure to OGB with the submission.
+3. Record the submission date and official status in this repository.

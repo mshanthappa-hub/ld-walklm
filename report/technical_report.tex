@@ -147,8 +147,9 @@ for the 1,636-dimensional integration; archives exact training and C\&S
 commands; and records both external tensor byte sizes and checksums. The LD
 tensor is 7,523,417,875 bytes with SHA-256
 \texttt{fb1309cb73d4b1199b3eef342d6d3dc7ce2d2e38c57d50543fd8da0c8bbd6ec7}.
-A linked v1 release preserves ten prediction tensors and logs; the equivalent
-v2 checkpoint/log archive remains a pre-submission action.
+The public v2 release preserves all ten prediction tensors, portable SHA-256
+checksums, the environment record, and the complete log bundle. The archived
+v1 release remains available for audit.
 
 V2 has three durable Git boundaries: protocol commit \texttt{827e8fc},
 validation-grid and lock commit \texttt{8320228}, and final-result commit

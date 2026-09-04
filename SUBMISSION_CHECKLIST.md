@@ -17,11 +17,10 @@
 - [x] Verify matching lock digests in the lock, marker, and final JSON.
 - [x] Record pinned sources, exact input tensor checksums, integration patch, parameter count, and environment.
 - [x] Write the technical report and form-ready submission record.
+- [x] Publish all ten v2 checkpoints, logs, hashes, and environment metadata in the v2 GitHub release.
 
 ## Before submitting
 
-- [ ] Archive and link v2 stage-3 checkpoints for seeds `10..19`.
-- [ ] Archive v2 per-seed training logs, checkpoint SHA-256 hashes, and environment record.
 - [ ] Re-run validation post-processing from downloaded v2 assets and compare it with the committed records.
 - [ ] Add a monitored contact email to `SUBMISSION.md`.
 - [ ] Include the concise historical protocol disclosure in the OGB submission.

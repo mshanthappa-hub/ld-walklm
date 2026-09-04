@@ -134,6 +134,12 @@ Final test: 0.8749843545 ± 0.0004904255
 Independent recalculation reproduces both validation and test aggregates and
 confirms that the locked candidate is the actual validation-grid winner.
 
+## Artifact release
+
+All ten v2 stage-3 tensors, portable checkpoint hashes, environment metadata,
+and logs are published at:
+<https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904>
+
 ## Interpretation
 
 V2 prevents any further test-driven choice from its committed boundary onward.

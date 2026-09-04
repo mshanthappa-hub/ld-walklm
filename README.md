@@ -179,13 +179,15 @@ in [`configs/experiment.yaml`](configs/experiment.yaml).
 
 ## Checkpoints and logs
 
-The verified artifact set is preserved in the
-[10-seed WalkLM release](https://github.com/MeghanaShanthappa/WalkLM/releases/tag/ogbn-products-sagn-10seed-20260903).
+The primary v2 artifact set is preserved in the
+[validation-locked 10-seed v2 release](https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904).
+It contains all ten seed `10..19` stage-3 tensors (460,419,782 bytes each),
+portable SHA-256 checksums, a size manifest, the recorded environment, and a
+compressed bundle of the per-seed, validation-grid, and final-test logs. The
+approximately 4.6 GB tensors are linked rather than duplicated in Git.
 
-The release contains all 10 stage-3 tensors (460,419,711 bytes each), their
-SHA-256 hashes, per-seed training logs, the raw result table, environment
-record, and checkpoint manifest. It is linked instead of duplicated here to
-avoid storing another copy of approximately 4.6 GB.
+The archived v1 tensors and logs remain available in the
+[exploratory v1 release](https://github.com/MeghanaShanthappa/WalkLM/releases/tag/ogbn-products-sagn-10seed-20260903).
 
 ## Reproducing EmbeddingGemma features
 
@@ -279,11 +281,10 @@ committed `final_test.json` is the authoritative one-time v2 test record.
 
 ## Reproducibility and submission status
 
-The v2 validation grid, selected lock, access marker, and final result are
-preserved in Git. The v1 release preserves its ten final tensors, logs, hashes,
-environment, and evaluator outputs. Before submission, the equivalent v2
-checkpoint/log archive should be published and linked here, and a monitored
-contact email must be added to `SUBMISSION.md`.
+The v2 validation grid, selected lock, access marker, final result, checkpoint
+hashes, size manifest, and environment record are preserved in Git. The public
+v2 release preserves all ten final tensors and the complete log bundle. A
+monitored contact email must still be added to `SUBMISSION.md`.
 
 V2 establishes a forward test-isolated selection boundary. It does not erase
 that EmbeddingGemma and the fixed pipeline were informed by the earlier v1
