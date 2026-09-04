@@ -2,12 +2,13 @@
 
 ## Current disposition
 
-**DO NOT SUBMIT THE CURRENT RESULT AS PROTOCOL-COMPLIANT.**
+**V2 IS THE PRIMARY SUBMISSION CANDIDATE; IT IS NOT YET AN OFFICIAL RESULT.**
 
-The artifacts and 10-seed calculation are complete, but the recovered history
-shows test-aware encoder and C&S selection. See `TUNING_AND_PROTOCOL.md`.
-The following form record is preserved so it can be completed after OGB gives
-guidance or after a clean, pre-registered experiment is run.
+The validation-selected configuration, one-time final evaluation, and audit
+evidence are complete. V2 prevents test-driven changes after the committed
+protocol boundary. Because the earlier v1 test results informed the fixed
+EmbeddingGemma pipeline, preserve the concise disclosure below when asking OGB
+to accept the entry.
 
 ## Form-ready fields
 
@@ -17,10 +18,10 @@ guidance or after a clean, pre-registered experiment is run.
 | Dataset | `ogbn-products` |
 | Method | `LD + EmbeddingGemma-WalkLM + Raw + SAGN/SLE + C&S (external data)` |
 | External data | Yes: released LD BERT features, product raw text, and `google/embeddinggemma-300m` |
-| Test performance | `0.8747530490 ± 0.0004873863` (exploratory; not currently eligible) |
-| Validation performance | `0.9400096636 ± 0.0002987397` |
-| Runs | 10 independent seeds, 0 through 9 |
-| Standard deviation | Unbiased sample standard deviation (`torch.std`, correction 1) |
+| Test performance | `0.8749843545 ± 0.0004904255` |
+| Validation performance | `0.9405843908 ± 0.0004332633` |
+| Runs | 10 independent seeds, 10 through 19 |
+| Standard deviation | Unbiased sample standard deviation (`ddof=1`) |
 | Contact | Meghana Shanthappa — **REQUIRED: add a monitored email address** |
 | Code | <https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm> |
 | Technical report | `report/technical_report.pdf` in the code repository |
@@ -35,29 +36,35 @@ We concatenate released 768-dimensional LD BERT hidden states,
 product-graph random walks, and the 100-dimensional OGB node features. A
 four-stage SAGN/SLE model uses two feature-propagation hops and nine
 label-propagation hops. Parameter-free Correct & Smooth is applied to each
-seed's final predictions. Scores use the official split and OGB evaluator.
+seed final prediction. Scores use the official split and OGB evaluator.
 
-## Tuned hyperparameters
+## Locked v2 selection
 
-Use the complete disclosure in `TUNING_AND_PROTOCOL.md`, not a shortened claim.
-The final recorded SAGN configuration is in `configs/experiment.yaml`. The C&S
-candidate ranges included:
+The 27-member validation-only C&S grid selected:
 
 ```text
-correction_alpha: [0.30*, 0.35, 0.40, 0.4553513529697225, 0.55]
-smoothing_alpha:  [0.60, 0.65*, 0.70, 0.7153479868942039, 0.80]
-scale:            [10, 15, 20, 25*, 30]
+correction layers / alpha / adjacency: 50 / 0.35 / DAD
+smoothing layers / alpha / adjacency:  50 / 0.60 / DAD
+scale:                                  20
 ```
 
-The asterisks identify the recorded configuration, not a claim that it was
-selected without test feedback.
+The grid and lock were committed at `8320228eca9e66ff8d7b57080e240d312c0729db`
+before final test access. The guarded result and durable access marker were
+committed at `c195821768703cb1b72132b2906795e8003edf7d`. The final test mean is
+0.0012843545 (0.12843545 percentage points) above the public 0.8737 reference
+visible on 2026-09-04; this is only a prospective rank until accepted.
 
-## Remaining user/OGB actions
+## Protocol disclosure
+
+V2 used new seeds and validation-only training/C&S selection, with final test
+evaluation after the configuration lock was committed. Earlier exploratory
+runs had shown test scores while comparing encoders and C&S settings; those
+runs informed the fixed EmbeddingGemma pipeline but no v2 choice was changed
+after its committed boundary. Full details are in `TUNING_AND_PROTOCOL.md`.
+
+## Remaining actions
 
 1. Add a monitored contact email.
-2. Send OGB the protocol disclosure and ask whether the exploratory history
-   disqualifies this entry; do not omit it.
-3. If required, run a new pre-registered validation-only experiment and use
-   test accuracy exactly once after the configuration is locked. The committed
-   v2 workflow uses seeds `10..19` and stops before final test access.
-4. Submit through the official OGB Google form only after the above is clear.
+2. Archive and link the v2 seeds 10–19 stage-3 checkpoints, logs, hashes, and environment record.
+3. Send the repository/report and the protocol disclosure to OGB with the submission.
+4. Record the submission date and official status in this repository.

@@ -7,35 +7,45 @@ and Correct & Smooth (C&S).
 
 > [!IMPORTANT]
 >
-> The recorded 87.4753% test result is exploratory, not currently eligible
-> for OGB submission, because test scores were viewed during method and C&S
-> selection. See [TUNING_AND_PROTOCOL.md](TUNING_AND_PROTOCOL.md) and the
-> [submission record](SUBMISSION.md).
+> The validation-locked v2 result is **87.4984% ± 0.0490% test accuracy**.
+> This is a prospective Top-1 point estimate, not an official rank until OGB
+> reviews and accepts it. V2 prevents any test-driven choices after its
+> committed protocol boundary; the earlier v1 exploration remains disclosed in
+> [TUNING_AND_PROTOCOL.md](TUNING_AND_PROTOCOL.md).
 
 
-## Final result
+## Primary v2 result
 
-Official OGB split, seeds `0..9`. Values are accuracy mean ± unbiased sample
-standard deviation (`ddof=1`) across 10 independent runs.
+Official OGB split, new seeds `10..19`. Values are accuracy mean ± unbiased
+sample standard deviation (`ddof=1`) across 10 independent runs.
+
+| Evaluation | Validation | Test |
+|---|---:|---:|
+| Stage 3, before C&S | 0.939204 ± 0.000522 | Not evaluated |
+| Validation-selected C&S | **0.940584 ± 0.000433** | **0.874984 ± 0.000490** |
+
+Percentage form:
+
+- Validation: **94.0584% ± 0.0433%**
+- Test: **87.4984% ± 0.0490%**
+
+The point test mean is 0.001284 (0.1284 percentage points) above the 0.8737
+reference result recorded from the OGB leaderboard on 2026-09-04. It is not an
+official rank. The final test was evaluated after the 27 validation-only C&S
+records and selected configuration were committed at `8320228`; the guarded
+result was then recorded at `c195821`. The historical v1 experiment informed
+the fixed v2 method, so that history must accompany any eligibility discussion.
+See the
+[official leaderboard](https://ogb.stanford.edu/docs/leader_nodeprop/),
+[submission requirements](https://ogb.stanford.edu/docs/leader_overview/), and
+[experimental protocol](https://ogb.stanford.edu/docs/leader_rules/).
+
+### Archived v1 exploratory result
 
 | Evaluation | Train | Validation | Test |
 |---|---:|---:|---:|
 | Stage 3, before C&S | 0.958059 ± 0.000949 | 0.938901 ± 0.000271 | 0.872624 ± 0.000492 |
-| After selected C&S (exploratory) | **0.984537 ± 0.000081** | **0.940010 ± 0.000299** | **0.874753 ± 0.000487** |
-
-Percentage form:
-
-- Validation: **94.0010% ± 0.0299%**
-- Test: **87.4753% ± 0.0487%**
-
-The point test mean is 0.001053 (0.1053 percentage points) above the 0.8737
-reference result recorded from the OGB leaderboard on 2026-09-03. It is not an
-official rank. More importantly, the recovered history shows test-aware method
-selection, so this result must not be submitted as protocol-compliant without
-an explicit OGB ruling or a clean experiment. See the
-[official leaderboard](https://ogb.stanford.edu/docs/leader_nodeprop/),
-[submission requirements](https://ogb.stanford.edu/docs/leader_overview/), and
-[experimental protocol](https://ogb.stanford.edu/docs/leader_rules/).
+| After test-aware C&S exploration | 0.984537 ± 0.000081 | 0.940010 ± 0.000299 | 0.874753 ± 0.000487 |
 
 ## Method
 
@@ -83,7 +93,7 @@ the artifact boundary, and the protocol audit are documented in
 
 | Parameter | Value |
 |---|---:|
-| Seeds | 0 through 9 |
+| Seeds | 10 through 19 (v2); 0 through 9 (archived v1) |
 | SAGN hops (`K`) | 2 |
 | Label hops (`label-K`) | 9 |
 | Hidden size | 512 |
@@ -97,20 +107,21 @@ the artifact boundary, and the protocol audit are documented in
 | Weight decay | 0 |
 | Aggregation chunks | 4 |
 
-Tuned C&S parameters:
+Validation-selected v2 C&S parameters:
 
 | Parameter | Value |
 |---|---:|
 | Correction layers | 50 |
 | Smoothing layers | 50 |
-| Correction alpha | 0.30 |
-| Smoothing alpha | 0.65 |
+| Correction alpha | 0.35 |
+| Smoothing alpha | 0.60 |
 | Correction adjacency | DAD |
 | Smoothing adjacency | DAD |
-| Scale | 25 |
+| Scale | 20 |
 
-The machine-readable configuration is in
-[`configs/experiment.yaml`](configs/experiment.yaml).
+The primary machine-readable result is the committed validation lock and final
+JSON under [`results/v2/`](results/v2/). The archived v1 configuration remains
+in [`configs/experiment.yaml`](configs/experiment.yaml).
 
 ## Repository contents
 
@@ -162,6 +173,9 @@ The machine-readable configuration is in
   end-to-end v2 training and C&S selection without test-label evaluation.
 - [`scripts/run_final_test_once.sh`](scripts/run_final_test_once.sh): guarded
   final evaluator that requires the validation records and lock to be committed.
+- [`results/v2/validation_grid/locked_cs_config.json`](results/v2/validation_grid/locked_cs_config.json): validation-selected C&S configuration and per-seed validation scores.
+- [`results/v2/final_test/final_test.json`](results/v2/final_test/final_test.json): guarded one-time final test result.
+- [`results/v2/final_test/TEST_ACCESS_STARTED`](results/v2/final_test/TEST_ACCESS_STARTED): durable test-access audit marker.
 
 ## Checkpoints and logs
 
@@ -234,11 +248,20 @@ The script requires exactly 10 non-empty stage-3 checkpoints and writes a
 fresh per-seed TSV before calculating the mean and unbiased sample standard
 deviation.
 
-## Forward validation-only v2 workflow
+## Validation-locked v2 workflow
 
-The committed v2 protocol uses new seeds `10..19`, a dedicated prediction
-directory, validation-only training evaluation, and the frozen 27-candidate
-C&S grid. It intentionally stops after writing the selected configuration:
+The v2 protocol was committed before execution and uses new seeds `10..19`, a
+dedicated prediction directory, validation-only training evaluation, and a
+frozen 27-candidate C&S grid. All candidate records report
+`test_metrics_accessed: false`. The selection rule chose correction alpha
+0.35, smoothing alpha 0.60, and scale 20.
+
+The complete validation grid and lock were committed at `8320228` before test
+access. The guarded final evaluator wrote its durable access marker before
+loading the dataset and recorded the one-time final result at `c195821`. The
+lock digest matches the digest in both the marker and final JSON.
+
+To reproduce the validation-only run from a fresh prediction directory:
 
 ```bash
 export SAGN_ROOT=/path/to/SAGN_with_SLE
@@ -251,25 +274,19 @@ export WALKLM_FEATURE_PATH=/path/to/walklm_embeddinggemma.pt
 bash scripts/run_v2_validation_only.sh
 ```
 
-Review and commit all files under `results/v2/validation_grid/` before running
-`scripts/run_final_test_once.sh`. The final script refuses to proceed unless
-the 27 candidate records and selected lock are tracked and unchanged, and it
-creates a durable marker as soon as test access begins.
-
-This prevents further test-driven choices from the v2 lock forward. It does
-not erase the historical v1 test exposure described in
-`TUNING_AND_PROTOCOL.md`.
+Do not rerun the guarded final evaluator as part of model development. The
+committed `final_test.json` is the authoritative one-time v2 test record.
 
 ## Reproducibility and submission status
 
-The final checkpoints, logs, checkpoint hashes, environment, evaluator
-outputs, training and C&S arguments, pinned revisions, SAGN integration, exact
-EmbeddingGemma command, and both external input artifact checksums are
-preserved. The verified tensor metadata is recorded in
-`artifacts/input_manifest.tsv`.
+The v2 validation grid, selected lock, access marker, and final result are
+preserved in Git. The v1 release preserves its ten final tensors, logs, hashes,
+environment, and evaluator outputs. Before submission, the equivalent v2
+checkpoint/log archive should be published and linked here, and a monitored
+contact email must be added to `SUBMISSION.md`.
 
-The 423,228,606-parameter multi-stage count and technical report are included.
-However, the recovered test-aware tuning history is a substantive OGB protocol
-blocker. The current score is an exploratory research result, not a
-submission-ready leaderboard claim. Follow `SUBMISSION.md` and
-`TUNING_AND_PROTOCOL.md`; do not omit that disclosure.
+V2 establishes a forward test-isolated selection boundary. It does not erase
+that EmbeddingGemma and the fixed pipeline were informed by the earlier v1
+test-aware exploration. The repository therefore presents 87.4984% as a
+prospective Top-1 result, preserves the history, and does not claim an official
+rank before OGB accepts the submission.

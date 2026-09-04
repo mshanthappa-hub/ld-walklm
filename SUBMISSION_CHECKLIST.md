@@ -2,53 +2,40 @@
 
 ## Completed
 
-- [x] Use the official `ogbn-products` split.
-- [x] Run 10 independent seeds (`0..9`).
-- [x] Preserve per-seed stage-3 predictions.
-- [x] Preserve per-seed metrics before and after C&S.
-- [x] Calculate mean and unbiased sample standard deviation across 10 runs.
-- [x] Record OGB version 1.3.6.
-- [x] Record training and post-processing hyperparameters.
+- [x] Use the official `ogbn-products` split and OGB 1.3.6 evaluator.
 - [x] Declare external data: **Yes**.
-- [x] Archive all 10 final tensors, logs, hashes, and environment details.
-- [x] Verify the 10 release assets against SHA-256 checksums.
-- [x] Record pinned source revisions and their provenance boundary.
-- [x] Preserve and validate the recovered 1,636-dimensional SAGN integration.
-- [x] Recover the exact EmbeddingGemma command and semantic generation code.
-- [x] Recover the EmbeddingGemma artifact byte size and SHA-256.
-- [x] Record the LD input tensor byte size and SHA-256.
-- [x] Calculate the conservative multi-stage parameter count.
-- [x] Write a technical report and form-ready submission record.
-- [x] Preserve the tuning history and protocol audit.
-- [x] Add a validation-only C&S selection and configuration-locking workflow.
+- [x] Preserve the v1 exploratory run and complete tuning disclosure.
+- [x] Commit the v2 protocol before execution (`827e8fc`).
+- [x] Run 10 new v2 seeds (`10..19`) without test metric evaluation during training.
+- [x] Evaluate all 27 C&S candidates using validation metrics only.
+- [x] Select maximum mean validation accuracy with the committed tie breakers.
+- [x] Commit every validation record and the selected lock before test access (`8320228`).
+- [x] Run the guarded final-test evaluator once.
+- [x] Preserve the durable access marker and final JSON (`c195821`).
+- [x] Independently reproduce the v2 mean and unbiased sample standard deviation.
+- [x] Verify that the selected candidate is the actual validation-grid winner.
+- [x] Verify matching lock digests in the lock, marker, and final JSON.
+- [x] Record pinned sources, exact input tensor checksums, integration patch, parameter count, and environment.
+- [x] Write the technical report and form-ready submission record.
 
 ## Before submitting
 
-- [ ] Preserve or link the LD tensor outside Git; the EmbeddingGemma artifact is
-      in the original WalkLM LFS commit.
-- [ ] Re-run the evaluator from downloaded release assets and compare its TSV
-      byte-for-byte or numerically with `results/cs_per_seed.tsv`.
+- [ ] Archive and link v2 stage-3 checkpoints for seeds `10..19`.
+- [ ] Archive v2 per-seed training logs, checkpoint SHA-256 hashes, and environment record.
+- [ ] Re-run validation post-processing from downloaded v2 assets and compare it with the committed records.
 - [ ] Add a monitored contact email to `SUBMISSION.md`.
-- [ ] Disclose the test-aware selection history to OGB and obtain a ruling.
-- [ ] If required, run a clean, pre-registered validation-only experiment and
-      evaluate the test split once after locking the method.
-- [ ] For v2, commit all 27 validation candidate records and
-      `locked_cs_config.json` before invoking the guarded final-test script.
-- [ ] Submit through the official OGB form only when protocol eligibility is
-      resolved.
-- [ ] Add the submission date and official leaderboard URL or status here.
+- [ ] Include the concise historical protocol disclosure in the OGB submission.
+- [ ] Submit through the official OGB process.
+- [ ] Add the submission date and official leaderboard URL or decision here.
 
-## Proposed future method name
-
-`LD + EmbeddingGemma-WalkLM + Raw + SAGN/SLE + C&S`
-
-## Exploratory result (not currently eligible to submit)
+## Primary v2 result
 
 ```text
-Validation: 0.9400096636 ± 0.0002987397
-Test:       0.8747530490 ± 0.0004873863
-Runs:       10
+Validation: 0.9405843908 ± 0.0004332633
+Test:       0.8749843545 ± 0.0004904255
+Runs:       10 (seeds 10–19)
 Std:        unbiased sample standard deviation (ddof=1)
 External data: Yes
 OGB version: 1.3.6
+Status:     prospective Top-1; not official until accepted
 ```

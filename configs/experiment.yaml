@@ -1,3 +1,6 @@
+experiment_id: ogbn-products-walklm-v1-exploratory
+status: archived_test_aware_exploration
+
 dataset:
   name: ogbn-products
   split: official
@@ -99,3 +102,34 @@ reporting:
   runs: 10
   standard_deviation: unbiased_sample
   ddof: 1
+
+
+v2_result:
+  role: primary_submission_candidate
+  status: prospective_not_official
+  protocol_commit: 827e8fc
+  validation_lock_commit: 8320228eca9e66ff8d7b57080e240d312c0729db
+  final_result_commit: c195821768703cb1b72132b2906795e8003edf7d
+  seeds: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  correct_and_smooth:
+    correction_layers: 50
+    smoothing_layers: 50
+    correction_alpha: 0.35
+    smoothing_alpha: 0.60
+    correction_adjacency: DAD
+    smoothing_adjacency: DAD
+    scale: 20
+    selection: maximum_mean_validation_accuracy
+    candidate_count: 27
+  before_cs_validation:
+    mean: 0.9392035195687003
+    std_unbiased: 0.0005224145925439734
+  selected_cs_validation:
+    mean: 0.940584390814536
+    std_unbiased: 0.00043326333620965205
+  final_test:
+    mean: 0.874984354461701
+    std_unbiased: 0.0004904255484690718
+    evaluation_scope: post_correct_and_smooth_only
+  lock_sha256: 3d5f7ed1a2096dff5de4aeb45bbb83b1378c60aa43eeec2e926f206cca299f8d
+  historical_caveat: v1_test_aware_exploration_informed_fixed_method

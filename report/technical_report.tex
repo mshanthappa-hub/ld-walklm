@@ -9,51 +9,52 @@
 \hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.55em}
-\title{LD + EmbeddingGemma-WalkLM + SAGN on \texttt{ogbn-products}:\\A Ten-Seed Exploratory Study}
+\sloppy
+\title{LD + EmbeddingGemma-WalkLM + SAGN on \texttt{ogbn-products}:\\A Validation-Locked Ten-Seed Study}
 \author{Meghana Shanthappa\\\small\url{https://github.com/MeghanaShanthappa}}
-\date{September 3, 2026}
+\date{September 4, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-We study a language-augmented node-classification pipeline for the Open Graph
+We present a language-augmented node-classification pipeline for the Open Graph
 Benchmark \texttt{ogbn-products} dataset. The method concatenates released
 Label Deconvolution (LD) BERT features, graph-walk text embeddings from
-\texttt{google/embeddinggemma-300m}, and the original OGB features, then
-trains a four-stage SAGN/SLE predictor and applies Correct \& Smooth (C\&S).
-Across seeds 0--9, the recorded final validation accuracy is
-$0.940010 \pm 0.000299$ and test accuracy is
-$0.874753 \pm 0.000487$, using unbiased sample standard deviation.
-The artifact audit recovered the exact embedding command, input checksums,
-training outputs, and parameter accounting. It also found that test scores
-were viewed during encoder and C\&S selection. We therefore report this as an
-exploratory result and do not claim that it is eligible for the OGB
-leaderboard without an explicit ruling or a clean validation-only rerun.
+\texttt{google/embeddinggemma-300m}, and the original OGB features, then trains
+a four-stage SAGN/SLE predictor and applies Correct \& Smooth (C\&S). A
+protocol-locked v2 run over seeds 10--19 selected C\&S using validation
+accuracy only and evaluated test accuracy once after committing the lock. It
+achieves validation accuracy $0.940584 \pm 0.000433$ and test accuracy
+$0.874984 \pm 0.000490$, using unbiased sample standard deviation. This point
+estimate is 0.001284 above the public 0.8737 reference visible on September 4,
+2026, but is not an official rank until accepted. We preserve a full audit,
+including the fact that earlier v1 test-aware exploration informed the fixed
+EmbeddingGemma pipeline.
 \end{abstract}
 
 \section{Dataset and evaluation}
 
-We use the official \texttt{ogbn-products} split and the OGB evaluator
-(OGB 1.3.6). After the preprocessing used by SAGN, the graph contains
-2,449,029 nodes and 123,718,280 directed edges, with 196,615 training,
-39,323 validation, and 2,213,091 test nodes over 47 classes. Ten independent
-runs use seeds 0 through 9. We report the arithmetic mean and unbiased sample
-standard deviation ($n-1$ denominator) of the raw per-seed evaluator values.
+We use the official \texttt{ogbn-products} split and OGB evaluator (OGB 1.3.6).
+After SAGN preprocessing, the graph contains 2,449,029 nodes and 123,718,280
+directed edges, with 196,615 training, 39,323 validation, and 2,213,091 test
+nodes over 47 classes. Ten independent v2 runs use seeds 10 through 19. We
+report arithmetic means and unbiased sample standard deviations with the
+$n-1$ denominator.
 
 \section{Method}
 
 \subsection{Input representation}
 
-For every node, we concatenate the following tensors in a fixed column order:
+For every node, we concatenate these tensors in a fixed column order:
 
 \begin{center}
-\begin{tabular}{lrp{8.2cm}}
+\begin{tabular}{lrp{7.8cm}}
 \toprule
 Component & Dimension & Origin \\
 \midrule
 LD BERT hidden state & 768 & Released \texttt{products\_sagn/hidden\_state.pt} from the LD authors \\
-EmbeddingGemma-WalkLM & 768 & Masked-mean pooled, normalized embeddings of attributed random walks \\
+EmbeddingGemma-WalkLM & 768 & Masked-mean pooled, normalized attributed-walk embeddings \\
 Raw OGB feature & 100 & Original \texttt{ogbn-products} node feature \\
 \midrule
 Concatenated input & 1,636 & Order: LD, EmbeddingGemma-WalkLM, raw \\
@@ -61,9 +62,8 @@ Concatenated input & 1,636 & Order: LD, EmbeddingGemma-WalkLM, raw \\
 \end{tabular}
 \end{center}
 
-The LD feature is external released data. The product text and pretrained
-EmbeddingGemma model are also external data, so the method must be submitted
-with \emph{External data: Yes}.
+The LD feature, product text, and pretrained EmbeddingGemma model are external
+data. The method must therefore be submitted with \emph{External data: Yes}.
 
 \subsection{EmbeddingGemma-WalkLM extraction}
 
@@ -71,62 +71,53 @@ Directed random walks are sampled independently for every node with seed 42.
 Four walks of length four are generated. Each visited product contributes the
 first 160 characters of its released text, and visited nodes are separated by
 the token ``cites.'' Text is tokenized to at most 160 tokens. The final hidden
-state of \texttt{google/embeddinggemma-300m} is mean pooled with the attention
-mask and L2 normalized. The encoder is not fine-tuned. Batch size is four.
-The recovered command is:
+state of \texttt{google/embeddinggemma-300m} is attention-mask mean pooled and
+L2 normalized. The encoder is not fine-tuned and batch size is four.
 
-\begin{verbatim}
-PYTHONPATH=. python -u walklm.py \
-  --dataset ogbn-products \
-  --hf_model google/embeddinggemma-300m \
-  --encoder_type auto_model --pooling mean \
-  --normalize_embeddings --mlm_epochs 0 --epochs 1 \
-  --batch_size 4 --num_walks 4 --walk_length 4 \
-  --max_length 160 --max_text_chars 160 \
-  --use_raw_features --save_embeddings
-\end{verbatim}
-
-The artifact is a PyTorch dictionary containing \texttt{walklm\_x} and
-\texttt{raw\_x}. Its recorded size is 8,503,030,973 bytes and SHA-256 is
+The saved PyTorch dictionary contains \texttt{walklm\_x} and \texttt{raw\_x}.
+Its size is 8,503,030,973 bytes and SHA-256 is
 \texttt{fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90}.
-A standalone, label-free preservation of this path is provided in
+The label-free generation path is preserved in
 \texttt{scripts/generate\_embeddinggemma\_features.py}.
 
 \subsection{SAGN/SLE and post-processing}
 
-The final predictor uses two feature-propagation hops, nine label-propagation
-hops, 512 hidden channels, one attention head, learning rate 0.001, batch size
+The predictor uses two feature-propagation hops, nine label-propagation hops,
+512 hidden channels, one attention head, learning rate 0.001, batch size
 50,000, and dropout values 0.5/0.4/0.2/0.5 for model, attention, input, and
 label paths. Four self-training stages run for 300, 100, 100, and 100 epochs
-with thresholds 0.95, 0.95, and 0.999. Feature propagation is split into four
-CPU-memory chunks. Each seed is post-processed with 50 correction and 50
-smoothing iterations, DAD normalization, correction alpha 0.30, smoothing
-alpha 0.65, and scale 25.
+with thresholds 0.95, 0.95, and 0.999. Feature propagation uses four
+CPU-memory chunks.
 
-Only training labels are passed to SAGN/SLE label features and C\&S. Validation
-labels are used for early stopping/evaluation. The implementation does not
-feed validation or test labels into propagation.
+Each seed is post-processed with 50 correction and 50 smoothing iterations,
+DAD normalization, correction alpha 0.35, smoothing alpha 0.60, and scale 20.
+The committed 27-candidate validation-only grid selected these values. Only
+training labels are passed to SAGN/SLE label features and C\&S. Validation
+labels are used for early stopping and selection; test labels are not fed into
+propagation.
 
 \section{Results}
 
 \begin{center}
-\begin{tabular}{lccc}
+\begin{tabular}{lcc}
 \toprule
-Evaluation & Train & Validation & Test \\
+Evaluation & Validation & Test \\
 \midrule
-Stage 3 before C\&S & $0.958059\pm0.000949$ & $0.938901\pm0.000271$ & $0.872624\pm0.000492$ \\
-After C\&S & $0.984537\pm0.000081$ & $0.940010\pm0.000299$ & $0.874753\pm0.000487$ \\
+V1 C\&S (exploratory) & $0.940010\pm0.000299$ & $0.874753\pm0.000487$ \\
+V2 stage 3 before C\&S & $0.939204\pm0.000522$ & Not evaluated \\
+V2 validation-selected C\&S & $\mathbf{0.940584\pm0.000433}$ & $\mathbf{0.874984\pm0.000490}$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The final test mean is 0.001053 above the 0.8737 public leaderboard entry
-visible on September 3, 2026. This numerical comparison is not an official
-rank and does not override the protocol limitation in Section~\ref{sec:audit}.
+The primary v2 test mean is 0.001284 (0.1284 percentage points) above the
+0.8737 public leaderboard reference visible on September 4, 2026. This is a
+prospective Top-1 point estimate rather than an official rank. Per-seed values
+are preserved in the selected lock and final JSON.
 
 \section{Parameter accounting}
 
-Following OGB's multi-stage counting rule, we conservatively sum all learned
+Following the OGB multi-stage counting rule, we conservatively sum all learned
 feature-generation and prediction components:
 
 \begin{center}
@@ -145,45 +136,54 @@ Total & 423,228,606 \\
 \end{tabular}
 \end{center}
 
-The first two rows sum to OGB's published 110,636,896 parameter count for the
-LD+SAGN products entry. The final SAGN count is the runtime count printed by
-every preserved training log.
+The first two rows sum to the published 110,636,896 parameter count for the
+LD+SAGN products entry. Every preserved training log reports the final SAGN
+runtime count.
 
 \section{Reproducibility}
 
 The repository pins SAGN, LD, and WalkLM revisions; includes a validated patch
-for the 1,636-dimensional feature integration; archives exact training and
-C\&S commands; preserves per-seed evaluator outputs; and links a release with
-all ten final prediction tensors, training logs, and checkpoint hashes.
-Both external tensor byte sizes and SHA-256 checksums are recorded in the
-input manifest. The LD tensor is 7,523,417,875 bytes with SHA-256
+for the 1,636-dimensional integration; archives exact training and C\&S
+commands; and records both external tensor byte sizes and checksums. The LD
+tensor is 7,523,417,875 bytes with SHA-256
 \texttt{fb1309cb73d4b1199b3eef342d6d3dc7ce2d2e38c57d50543fd8da0c8bbd6ec7}.
+A linked v1 release preserves ten prediction tensors and logs; the equivalent
+v2 checkpoint/log archive remains a pre-submission action.
+
+V2 has three durable Git boundaries: protocol commit \texttt{827e8fc},
+validation-grid and lock commit \texttt{8320228}, and final-result commit
+\texttt{c195821}. The selected lock has SHA-256
+\texttt{3d5f7ed1a2096dff5de4aeb45bbb83b1378c60aa43eeec2e926f206cca299f8d},
+matching the final result and test-access marker.
 
 \section{Protocol audit}\label{sec:audit}
 
-The experiment history shows two forms of test-aware selection. First, several
-text encoders were screened by reporting OGB test-split accuracy on a
-725,745-node subset before EmbeddingGemma was selected for the full graph.
-Second, C\&S candidates were explicitly compared and sorted by test accuracy.
-The recorded setting (0.30, 0.65, 25) was retained during this exploration.
-This conflicts with the OGB rule that test labels are for final evaluation.
+The historical v1 experiment shows two forms of test-aware selection. Several
+text encoders were screened using OGB test-split accuracy on a smaller graph,
+and C\&S candidates were compared by test accuracy. V1 is retained only as an
+exploratory result.
 
-The repository therefore marks \texttt{leaderboard\_eligible\_as\_recorded}
-as false and includes a validation-only C\&S grid and locking utility for
-future work. That utility does not retroactively erase prior test feedback.
-A submission should proceed only after disclosing this history to OGB and
-receiving a favorable ruling, or after developing a clean, pre-registered
-method whose choices use validation results only.
+For v2, \texttt{protocol/v2\_pre\_registration.yaml} froze new seeds, the
+model, and C\&S grid before execution. Training masked all 2,213,091 test
+labels and reported no test metric. Every one of the 27 candidate records
+declares \texttt{test\_metrics\_accessed: false}; the maximum-mean validation
+rule selected correction alpha 0.35, smoothing alpha 0.60, and scale 20. Those
+records and their lock were committed before the guarded final-test command.
+The command wrote a durable marker before dataset access and evaluated only
+post-C\&S test predictions.
+
+This establishes a forward test-isolated selection boundary. It does not erase
+that v1 helped choose the fixed EmbeddingGemma method, so that fact remains
+disclosed. The result should be described as prospective until OGB accepts it.
 
 \section{Conclusion}
 
-The preserved ten-seed experiment is numerically competitive and substantially
-more reproducible than the original ad hoc run. Its scientific value is as an
-exploratory result and artifact package. The remaining barrier to an official
-leaderboard claim is experimental protocol, not the arithmetic or checkpoint
-record.
-
-\enlargethispage{3\baselineskip}
+The validation-locked v2 experiment produces a prospective Top-1 point
+estimate of $0.874984 \pm 0.000490$ across ten seeds. Its validation selection,
+configuration lock, one-time test access, and aggregate arithmetic are
+auditable. Submission should include the external-data declaration and the
+historical v1 disclosure; the result becomes official only after OGB accepts
+it.
 
 \section*{References}
 
