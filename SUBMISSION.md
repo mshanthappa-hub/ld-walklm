@@ -16,14 +16,14 @@ to accept the entry.
 |---|---|
 | OGB version | 1.3.6 |
 | Dataset | `ogbn-products` |
-| Method | `LD + EmbeddingGemma-WalkLM + Raw + SAGN/SLE + C&S (external data)` |
+| Method | `LD/WalkLM (external data)` |
 | External data | Yes: released LD BERT features, product raw text, and `google/embeddinggemma-300m` |
 | Test performance | `0.8749843545 ± 0.0004904255` |
 | Validation performance | `0.9405843908 ± 0.0004332633` |
 | Runs | 10 independent seeds, 10 through 19 |
 | Standard deviation | Unbiased sample standard deviation (`ddof=1`) |
 | Contact | Meghana Shanthappa — shanthappa.meghana@gmail.com |
-| Code | <https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm> |
+| Code | <https://github.com/MeghanaShanthappa/ld-walklm> |
 | Technical report | `report/technical_report.pdf` in the code repository |
 | Parameters | 423,228,606 conservative multi-stage total; see `results/parameter_count.tsv` |
 | Hardware | NVIDIA RTX PRO 4500 Blackwell, 32,623 MiB GPU memory |
@@ -65,7 +65,7 @@ after its committed boundary. Full details are in `TUNING_AND_PROTOCOL.md`.
 ## Artifact release
 
 All ten v2 stage-3 checkpoints, logs, hashes, and environment metadata are in:
-<https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904>
+<https://github.com/MeghanaShanthappa/ld-walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904>
 
 ## Remaining actions
 

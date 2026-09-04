@@ -138,7 +138,7 @@ confirms that the locked candidate is the actual validation-grid winner.
 
 All ten v2 stage-3 tensors, portable checkpoint hashes, environment metadata,
 and logs are published at:
-<https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904>
+<https://github.com/MeghanaShanthappa/ld-walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904>
 
 ## Interpretation
 

@@ -107,7 +107,7 @@ reporting:
 v2_result:
   role: primary_submission_candidate
   status: prospective_not_official
-  artifact_release: https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904
+  artifact_release: https://github.com/MeghanaShanthappa/ld-walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904
   protocol_commit: 827e8fc
   validation_lock_commit: 8320228eca9e66ff8d7b57080e240d312c0729db
   final_result_commit: c195821768703cb1b72132b2906795e8003edf7d

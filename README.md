@@ -1,4 +1,4 @@
-# ogbn-products leaderboard experiment
+# LD/WalkLM on ogbn-products
 
 Reproducibility and submission evidence for a 10-seed `ogbn-products`
 node-classification experiment using language-derived features with SAGN/SLE
@@ -199,7 +199,7 @@ in [`configs/experiment.yaml`](configs/experiment.yaml).
 ## Checkpoints and logs
 
 The primary v2 artifact set is preserved in the
-[validation-locked 10-seed v2 release](https://github.com/MeghanaShanthappa/ogbn-products-leaderboard_walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904).
+[validation-locked 10-seed v2 release](https://github.com/MeghanaShanthappa/ld-walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904).
 It contains all ten seed `10..19` stage-3 tensors (460,419,782 bytes each),
 portable SHA-256 checksums, a size manifest, the recorded environment, and a
 compressed bundle of the per-seed, validation-grid, and final-test logs. The
