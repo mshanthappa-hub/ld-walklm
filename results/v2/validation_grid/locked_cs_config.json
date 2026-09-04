@@ -1,0 +1,32 @@
+{
+  "selection_rule": "maximum mean validation accuracy; ties broken by minimum unbiased validation standard deviation, then filename",
+  "test_metrics_accessed": false,
+  "candidate_count": 27,
+  "candidate_records_sha256": "7aece8d8b28481cd60cf05ce847ff5759b849c638416b1a4be170a842abf14bf",
+  "selected_parameters": {
+    "correction_layers": 50,
+    "smoothing_layers": 50,
+    "correction_alpha": 0.35,
+    "smoothing_alpha": 0.6,
+    "correction_adjacency": "DAD",
+    "smoothing_adjacency": "DAD",
+    "scale": 20.0
+  },
+  "selected_validation": {
+    "per_seed": {
+      "10": 0.9406454237977774,
+      "11": 0.9405437021590418,
+      "12": 0.9395264857716857,
+      "13": 0.9407217150268291,
+      "14": 0.9407471454365129,
+      "15": 0.9410777407624037,
+      "16": 0.9404674109299901,
+      "17": 0.9407217150268291,
+      "18": 0.9410268799430359,
+      "19": 0.9403656892912545
+    },
+    "mean": 0.940584390814536,
+    "std_unbiased": 0.00043326333620965205
+  },
+  "warning": "This lock makes future selection auditable but cannot erase any test-aware exploration performed before it was created."
+}
