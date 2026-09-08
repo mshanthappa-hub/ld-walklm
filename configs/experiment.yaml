@@ -41,8 +41,8 @@ features:
     reconstruction_model_revision: 57c266a7
     original_model_revision: unknown
     source_text: PyG_TAGDataset_GLEM_title_and_description
-    walk_edge_records_as_loaded: 61859140
-    sagn_edge_records_after_symmetrization: 123718280
+    walk_edge_records_as_loaded: 123718280
+    undirected_product_relations: 61859140
     encoder_type: auto_model
     seed: 42
     num_walks: 4
