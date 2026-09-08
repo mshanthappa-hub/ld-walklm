@@ -1,0 +1,35 @@
+{
+  "output": "/tmp/mshanthappa_walklm/embeddinggemma_prefix128.pt",
+  "sha256": "4322026f33f6c2e0ff4bbad320bf8db5877416bcae3549e3d8ef5d5f04c4bf3a",
+  "archived_sha256": "fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90",
+  "matches_archived_container": false,
+  "walklm_shape": [
+    128,
+    768
+  ],
+  "walklm_dtype": "torch.float32",
+  "raw_shape": [
+    128,
+    100
+  ],
+  "model": "google/embeddinggemma-300m",
+  "model_revision": "57c266a7",
+  "script_status": "post_hoc_reconstruction",
+  "max_nodes": 128,
+  "seed": 42,
+  "num_walks": 4,
+  "walk_length": 4,
+  "pooling": "last_hidden_state_attention_masked_mean",
+  "normalize_embeddings": true,
+  "max_length": 160,
+  "max_text_chars": 160,
+  "batch_size": 4,
+  "torch": "2.12.0.dev20260408+cu128",
+  "transformers": "5.16.1",
+  "cuda": "12.8",
+  "device": "cuda",
+  "gpu": "NVIDIA RTX PRO 4500 Blackwell",
+  "model_parameter_dtype": "torch.float32",
+  "encoder_fine_tuned": false,
+  "token_limit_effect": "walks_2_through_4_truncated_before_encoder"
+}

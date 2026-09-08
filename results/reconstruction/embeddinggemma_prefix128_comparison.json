@@ -1,0 +1,10 @@
+{
+  "rows": 128,
+  "dimensions": 768,
+  "mean_cosine_similarity": 1.0,
+  "min_cosine_similarity": 0.9999998211860657,
+  "max_cosine_similarity": 1.000000238418579,
+  "mean_l2_difference": 0.0,
+  "max_absolute_difference": 0.0,
+  "exactly_equal": true
+}
