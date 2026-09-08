@@ -117,10 +117,12 @@ environment. The archived tensor checksum is therefore authoritative. A future
 reconstruction can test semantic similarity but need not reproduce a
 byte-identical PyTorch container.
 
-A deterministic prefix can be regenerated with `--max-nodes` and compared to
-the matching archived rows using `scripts/compare_embeddinggemma_subset.py`.
-The resulting cosine-similarity JSON will be committed after the GPU check is
-completed.
+A deterministic 128-node prefix was regenerated with `--max-nodes 128` and
+compared with the matching archived rows using
+`scripts/compare_embeddinggemma_subset.py`. All 98,304 float32 values are
+exactly equal: mean cosine similarity 1.0, mean L2 difference 0.0, and maximum
+absolute difference 0.0. The comparison and reconstruction environment are
+committed under `results/reconstruction/` at commit `7c09ca5`.
 
 ## Recovered SAGN integration
 

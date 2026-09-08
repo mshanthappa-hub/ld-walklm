@@ -123,6 +123,5 @@ five-part, checksum-verified EmbeddingGemma input tensor are published at:
 
 ## Remaining actions
 
-1. Complete and record the subset reconstruction comparison.
-2. Send the updated repository and disclosure to OGB.
-3. Record the submission date and OGB decision.
+1. Send the updated repository and disclosure to OGB.
+2. Record the submission date and OGB decision.

@@ -158,6 +158,12 @@ EmbeddingGemma reconstruction. The original EmbeddingGemma generation
 versions, internal compute dtype, GPU, and resolved model revision were not
 captured and are reported as unknown rather than inferred from later runs.
 
+A 128-node deterministic prefix was reconstructed with the pinned model and
+settings on an NVIDIA RTX PRO 4500 Blackwell. All 98,304 float32 embedding
+values exactly match the corresponding archived tensor rows (mean cosine
+similarity 1.0, mean L2 difference 0.0, maximum absolute difference 0.0). The
+comparison JSON and reconstruction environment are committed in the repository.
+
 A v2-from-release script downloads all ten predictions, verifies their
 SHA-256 values, recomputes the validation grid and lock, and reproduces the
 final metric separately. Small v1 provenance artifacts have been migrated into

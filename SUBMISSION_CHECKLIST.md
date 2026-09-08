@@ -28,7 +28,7 @@
 
 - [x] Mirror the EmbeddingGemma input in five sub-2-GiB v2 release parts.
 - [x] Mirror all 36 v1 release assets into `ld-walklm` and make the old repository private.
-- [ ] Run and commit the EmbeddingGemma prefix cosine-similarity check.
+- [x] Run and commit the 128-node EmbeddingGemma prefix comparison (exact equality; commit `7c09ca5`).
 
 - [ ] Re-run validation post-processing from downloaded v2 assets and compare it with the committed records.
 - [ ] Include the concise historical protocol disclosure in the OGB submission.

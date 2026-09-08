@@ -197,6 +197,8 @@ in [`configs/experiment.yaml`](configs/experiment.yaml).
   validation grid, and compare the locked validation and final-test records.
 - [`scripts/compare_embeddinggemma_subset.py`](scripts/compare_embeddinggemma_subset.py):
   deterministic prefix comparison for the reconstruction script.
+- [`results/reconstruction/`](results/reconstruction/): exact 128-row prefix
+  comparison and the reconstruction environment metadata.
 - [`SUBMISSION_CHECKLIST.md`](SUBMISSION_CHECKLIST.md): remaining steps for an
   official OGB submission.
 - [`report/technical_report.pdf`](report/technical_report.pdf): concise method,
@@ -262,6 +264,10 @@ export OUTPUT=/path/to/walklm_products_2449029_embeddinggemma300m_walks4_len4_me
 bash scripts/run_embeddinggemma_generation.sh
 ```
 
+A deterministic 128-node prefix reconstructed with the pinned settings is
+exactly equal to the corresponding archived rows: mean cosine similarity 1.0,
+mean L2 difference 0.0, and maximum absolute difference 0.0. The comparison
+and environment metadata are committed under `results/reconstruction/`.
 The script prints a SHA-256 and whether the serialized output matches the
 archived container checksum. See `PROVENANCE.md` for version limitations.
 
