@@ -62,6 +62,8 @@ fi
     echo "lock_sha256=$(sha256sum "${COMMITTED_GRID}/locked_cs_config.json" | awk '{print $1}')"
 } > "${MARKER}"
 
+# OGB 1.3.6 stores trusted PyG Data objects that require legacy loading on PyTorch 2.6+.
+export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=${TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD:-1}
 export DGLBACKEND=pytorch
 export SAGN_ROOT
 export SAGN_SRC_DIR="${SAGN_ROOT}/src"
