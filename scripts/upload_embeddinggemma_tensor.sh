@@ -2,7 +2,7 @@
 set -euo pipefail
 
 : "${INPUT_TENSOR:?Set INPUT_TENSOR to the complete archived EmbeddingGemma tensor}"
-: "${UPLOAD_ROOT:?Set UPLOAD_ROOT to a persistent directory with at least 9 GB free}"
+: "${UPLOAD_ROOT:?Set UPLOAD_ROOT to a directory with at least 2 GB free}"
 GH_REPO=${GH_REPO:-MeghanaShanthappa/ld-walklm}
 RELEASE_TAG=${RELEASE_TAG:-ogbn-products-walklm-v2-10seed-20260904}
 BASENAME=walklm_products_2449029_embeddinggemma300m_walks4_len4_mean_norm_embeddings.pt
@@ -16,39 +16,41 @@ if [[ "${actual}" != "${EXPECTED_SHA256}" ]]; then
     exit 1
 fi
 mkdir -p "${PART_DIR}"
-if find "${PART_DIR}" -maxdepth 1 -type f -name "${BASENAME}.part-*" | grep -q .; then
-    echo "ERROR: split parts already exist in ${PART_DIR}; use a fresh UPLOAD_ROOT."
-    exit 1
-fi
+find "${PART_DIR}" -maxdepth 1 -type f -name "${BASENAME}.part-*" -delete
+checksum_file="${PART_DIR}/walklm_embedding_parts.sha256"
+: > "${checksum_file}"
 
-split -b 1900M -a 2 "${INPUT_TENSOR}" "${PART_DIR}/${BASENAME}.part-"
-mapfile -t parts < <(find "${PART_DIR}" -maxdepth 1 -type f \
-    -name "${BASENAME}.part-*" -print | LC_ALL=C sort)
-for part in "${parts[@]}"; do
-    size=$(stat -c '%s' "${part}")
-    if [[ "${size}" -ge 2147483648 ]]; then
+file_size=$(stat -c "%s" "${INPUT_TENSOR}")
+chunk_mib=1900
+chunk_bytes=$((chunk_mib * 1024 * 1024))
+offset=0
+index=0
+
+while [[ "${offset}" -lt "${file_size}" ]]; do
+    suffix=$(printf "%02d" "${index}")
+    name="${BASENAME}.part-${suffix}"
+    part="${PART_DIR}/${name}"
+    dd if="${INPUT_TENSOR}" of="${part}" bs=1M \
+        skip="$((index * chunk_mib))" count="${chunk_mib}" status=progress
+    local_size=$(stat -c "%s" "${part}")
+    if [[ "${local_size}" -ge 2147483648 ]]; then
         echo "ERROR: ${part} is not smaller than 2 GiB."
         exit 1
     fi
-done
-(cd "${PART_DIR}" && sha256sum "${BASENAME}.part-"*) \
-    > "${PART_DIR}/walklm_embedding_parts.sha256"
-
-for asset in "${parts[@]}" "${PART_DIR}/walklm_embedding_parts.sha256"; do
-    gh release upload "${RELEASE_TAG}" "${asset}" \
+    (cd "${PART_DIR}" && sha256sum "${name}") >> "${checksum_file}"
+    gh release upload "${RELEASE_TAG}" "${part}" \
         --repo "${GH_REPO}" --clobber
-done
-release_assets="${PART_DIR}/release_assets.tsv"
-gh release view "${RELEASE_TAG}" --repo "${GH_REPO}" --json assets \
-    --jq '.assets[] | [.name, .size] | @tsv' > "${release_assets}"
-for asset in "${parts[@]}" "${PART_DIR}/walklm_embedding_parts.sha256"; do
-    name=$(basename "${asset}")
-    local_size=$(stat -c '%s' "${asset}")
-    remote_size=$(awk -F '\t' -v name="${name}" '$1 == name {print $2}' "${release_assets}")
+    remote_size=$(gh release view "${RELEASE_TAG}" --repo "${GH_REPO}" \
+        --json assets --jq ".assets[] | select(.name == \"${name}\") | .size")
     if [[ "${remote_size}" != "${local_size}" ]]; then
         echo "ERROR: release asset ${name} has size ${remote_size:-missing}; expected ${local_size}."
         exit 1
     fi
+    rm -f "${part}"
+    offset=$((offset + chunk_bytes))
+    index=$((index + 1))
 done
 
-echo "Uploaded ${#parts[@]} verified sub-2-GiB parts to ${GH_REPO}:${RELEASE_TAG}."
+gh release upload "${RELEASE_TAG}" "${checksum_file}" \
+    --repo "${GH_REPO}" --clobber
+echo "Uploaded and size-verified ${index} sub-2-GiB parts to ${GH_REPO}:${RELEASE_TAG}."
