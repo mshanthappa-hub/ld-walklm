@@ -40,7 +40,16 @@ at least these SAGN values:
 | Batch size | 25,000, 50,000 |
 
 These ranges are disclosed conservatively. Some trials were smoke tests or
-memory workarounds rather than completed candidates.
+memory workarounds rather than completed candidates. No principled reason for
+`K=2` was preserved: both `K=2` and `K=3` were explored, and `K=2` was carried
+forward from the test-visible v1 work. It is therefore classified as a
+test-aware choice rather than a validation-only v2 choice.
+
+Walk construction was also varied during early subset experiments. A products
+subset command used two walks of length three, 128-character node text, and
+the then-default 256-token encoder limit. The full EmbeddingGemma artifact used
+four walks of length four and 160-character/160-token limits. This was not a
+systematic controlled grid, but it was prior method variation and is disclosed.
 
 ## Recovered C&S exploration
 
@@ -79,6 +88,11 @@ setting was `(0.30, 0.65, 25)`. Contemporary notes explicitly compared and
 sorted candidates by test accuracy, so it cannot be represented as a purely
 validation-selected setting.
 
+The v2 validation grid is identical to the v1 focused grid. V2 selected
+`(0.35, 0.60, 20)` using validation only. The v1 test-selected setting
+`(0.30, 0.65, 25)` ranks 11th among the 27 v2 candidates by mean validation
+accuracy.
+
 ## Label use audit
 
 - Training labels are used for SAGN/SLE and as the only labels passed to C&S.
@@ -102,8 +116,9 @@ training or validation selection.
 
 ## Completed v2 execution
 
-`protocol/v2_pre_registration.yaml`, committed at `827e8fc`, froze seeds
-`10..19`, the full training configuration, the 27-member C&S grid, the
+Seeds `0..9` had already been consumed by test-aware v1 exploration, so v2
+preregistered fresh seeds `10..19` and reported all ten without selection.
+`protocol/v2_pre_registration.yaml`, committed at `827e8fc`, froze those seeds, the full training configuration, the 27-member C&S grid, the
 validation selection rule, and final-test policy before v2 execution. A later
 wrapper fix at `24f6978` only handled an upstream post-save NumPy summary error;
 it did not change the method or locked hyperparameters.
@@ -132,7 +147,19 @@ Final test: 0.8749843545 ± 0.0004904255
 ```
 
 Independent recalculation reproduces both validation and test aggregates and
-confirms that the locked candidate is the actual validation-grid winner.
+confirms that the locked candidate is the actual validation-grid winner. No
+v2 test accuracy was computed outside the guarded final invocation according to
+the preserved commands, logs, marker, and repository history.
+
+The selected setting exceeds the runner-up, `(0.30, 0.60, 25)`, by
+0.0000762912 mean validation accuracy. That is exactly three validation nodes
+per seed on average, or 30 additional correct predictions across ten seeds.
+
+A conservative lower bound is 300 v1 test evaluations from the final ten-seed
+SAGN training alone: 30 evaluation points per seed across four stages. Encoder
+screening, feature-stack trials, and C&S comparisons added further test looks.
+The exact total is not recoverable because some exploratory logs were not
+retained.
 
 ## Artifact release
 

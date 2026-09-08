@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# ARCHIVED V1 ONLY: this evaluates the test-aware (0.30, 0.65, 25) setting.
+# It does not reproduce the validation-locked v2 submission candidate.
 set -euo pipefail
 
 : "${SAGN_ROOT:?Set SAGN_ROOT to the SAGN_with_SLE checkout}"
@@ -6,7 +8,7 @@ set -euo pipefail
 : "${PROBS_DIR:?Set PROBS_DIR to the intermediate_outputs directory}"
 
 PYTHON_BIN=${PYTHON_BIN:-python}
-RESULTS_DIR=${RESULTS_DIR:-"${PWD}/results"}
+RESULTS_DIR=${RESULTS_DIR:-"${PWD}/results/v1/reproduced"}
 OUTPUT_DIR="${PROBS_DIR}/ogbn-products/sagn"
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 HELPER="${SCRIPT_DIR}/post_process_detailed.py"

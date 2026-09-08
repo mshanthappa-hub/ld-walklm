@@ -14,7 +14,6 @@ dataset:
 
 source_revisions:
   sagn_upstream_base: 08fe607ed7f31ca39740a44ce2f139565de3c595
-  walklm_packaging_snapshot: bff59aae01855a21cbf10fde932ccf0ac7ff9aab
   ld_snapshot: cf2804b08c1cb4453ca7950d9f20b3d3bc7a43e4
 
 external_data: true
@@ -39,6 +38,9 @@ features:
       sha256: fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90
   walklm_generation:
     model: google/embeddinggemma-300m
+    reconstruction_model_revision: 57c266a7
+    original_model_revision: unknown
+    source_text: PyG_TAGDataset_GLEM_title_and_description
     encoder_type: auto_model
     seed: 42
     num_walks: 4
@@ -49,6 +51,13 @@ features:
     max_text_chars: 160
     batch_size: 4
     mlm_epochs: 0
+    encoder_fine_tuned: false
+    token_limit_effect: walks_2_through_4_truncated_before_encoder
+    script_status: post_hoc_reconstruction
+    original_torch_version: unknown
+    original_transformers_version: unknown
+    original_compute_dtype: unknown
+    original_gpu: unknown
 
 training:
   model: sagn

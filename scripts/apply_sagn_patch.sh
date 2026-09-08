@@ -37,5 +37,5 @@ fi
 git -C "${TARGET}" apply --check "${PATCH_FILE}"
 git -C "${TARGET}" apply "${PATCH_FILE}"
 
-echo "Applied LD + EmbeddingGemma-WalkLM integration to ${TARGET}."
+echo "Applied LD + frozen EmbeddingGemma walk-text integration to ${TARGET}."
 echo "Set LD_FEATURE_PATH and WALKLM_FEATURE_PATH before training."

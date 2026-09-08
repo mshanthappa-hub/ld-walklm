@@ -1,4 +1,4 @@
-# LD/WalkLM on ogbn-products
+# LD + frozen EmbeddingGemma walk-text embeddings (WalkLM-style) + SAGN/SLE + C&S on ogbn-products
 
 Reproducibility and submission evidence for a 10-seed `ogbn-products`
 node-classification experiment using language-derived features with SAGN/SLE
@@ -6,26 +6,30 @@ and Correct & Smooth (C&S).
 
 ## Authors
 
-- Meghana Shanthappa
-- Junhao Shen
-- Rishi Puri
+- Meghana Shanthappa (NVIDIA)
+- Junhao Shen (NVIDIA)
+- Rishi Puri (NVIDIA)
 
-## How WalkLM improves the representation
+## Walk-text representation
 
-WalkLM turns local graph structure into language context. For every product
-node, four directed random walks of length four are rendered as text and
-encoded with `google/embeddinggemma-300m`. Attention-mask mean pooling and L2
-normalization produce a 768-dimensional vector that combines product semantics
-with information from its multi-hop graph neighborhood.
+For every product node, the generator samples four directed random walks of
+length four and renders visited nodes with the GLEM title-and-description text
+distributed through the PyG TAGDataset download path. The text is encoded with
+the pretrained `google/embeddinggemma-300m` model. Attention-mask mean pooling
+and L2 normalization produce one 768-dimensional vector per product.
 
-We concatenate this WalkLM vector with 768-dimensional LD BERT features and
-the 100-dimensional raw OGB features. SAGN/SLE therefore receives a richer
-1,636-dimensional input before multi-stage training and Correct & Smooth. The
-complete pipeline reaches **87.4984% ± 0.0490%** test accuracy, compared with
-the public 87.3700% reference: an observed improvement of **0.1284 percentage
-points**. V2 did not include a WalkLM-only ablation, so this margin measures the
-full combined pipeline and cannot be attributed exclusively to WalkLM.
+EmbeddingGemma is frozen: it is **not fine-tuned on the walk corpus**, unlike
+the language-model fine-tuning proposed by WalkLM. The phrase *WalkLM-style*
+refers only to rendering graph walks as text before encoding. The 160-token
+limit means that the first rendered walk consumes the available encoder input;
+walks two through four do not reach the encoder. Four walks are still generated
+to reconstruct the recorded artifact exactly.
 
+The walk-text vector is concatenated with 768-dimensional LD BERT features and
+100-dimensional raw OGB features, yielding a 1,636-dimensional SAGN/SLE input.
+The complete pipeline obtains **87.4984% ± 0.0490%** test accuracy. V2 did not
+include a walk-text-only or feature-stack ablation, so the difference from
+prior leaderboard entries cannot be attributed to this component alone.
 
 > [!IMPORTANT]
 >
@@ -50,13 +54,18 @@ Percentage form:
 - Validation: **94.0584% ± 0.0433%**
 - Test: **87.4984% ± 0.0490%**
 
-The point test mean is 0.001284 (0.1284 percentage points) above the 0.8737
-reference result recorded from the OGB leaderboard on 2026-09-04. It is not an
-official rank. The final test was evaluated after the 27 validation-only C&S
-records and selected configuration were committed at `8320228`; the guarded
-result was then recorded at `c195821`. The historical v1 experiment informed
-the fixed v2 method, so that history must accompany any eligibility discussion.
-See the
+The test point estimate is 0.001284 (0.1284 percentage points) above the
+`GLEM+GIANT+SAGN+SCR` public OGB entry of 0.8737 ± 0.0006 recorded on
+2026-09-04. The other directly discussed external-data comparator is
+`LD+GIANT+SAGN+SCR`, reported at 0.8718 ± 0.0004 with 110,636,896
+parameters. These are numerical comparisons; official status is determined by
+OGB. The final test was evaluated only after the 27 validation records and lock
+were committed at `8320228`; the guarded result was recorded at `c195821`.
+
+The selected C&S setting beat the runner-up by 0.0000762912 mean validation
+accuracy, exactly three validation nodes per seed on average (30 additional
+correct predictions summed over ten seeds). The historical v1 experiment
+informed the frozen v2 method and remains disclosed. See the
 [official leaderboard](https://ogb.stanford.edu/docs/leader_nodeprop/),
 [submission requirements](https://ogb.stanford.edu/docs/leader_overview/), and
 [experimental protocol](https://ogb.stanford.edu/docs/leader_rules/).
@@ -72,7 +81,7 @@ See the
 
 ```text
 LD released BERT hidden states       768 dimensions
-EmbeddingGemma-300M WalkLM features  768 dimensions
+Frozen EmbeddingGemma walk-text features (WalkLM-style)  768 dimensions
 Raw OGB node features                100 dimensions
                                       ----------------
 Combined input                      1636 dimensions
@@ -85,13 +94,15 @@ Correct & Smooth
 ```
 
 External data: **Yes**. The feature stack includes released LD language-model
-features and WalkLM features generated from product text.
+features, GLEM title-and-description text, and frozen EmbeddingGemma
+walk-text features.
 
 Implementations used:
 
-- [WalkLM experiment code](https://github.com/MeghanaShanthappa/WalkLM)
+- [WalkLM paper](https://proceedings.neurips.cc/paper_files/paper/2023/hash/2ac879d1865475a7abc8dfc7a9c15c27-Abstract-Conference.html)
 - [LD](https://github.com/MIRALab-USTC/LD)
 - [SAGN_with_SLE](https://github.com/skepsun/SAGN_with_SLE)
+- [Correct and Smooth](https://arxiv.org/abs/2010.13993)
 
 Exact source revisions, the recovered integration patch and generation command,
 the artifact boundary, and the protocol audit are documented in
@@ -157,28 +168,35 @@ in [`configs/experiment.yaml`](configs/experiment.yaml).
 - [`scripts/verify_input_artifacts.py`](scripts/verify_input_artifacts.py):
   shape, dtype, byte-size, and SHA-256 verifier for the two input tensors.
 - [`scripts/generate_embeddinggemma_features.py`](scripts/generate_embeddinggemma_features.py):
-  preserved label-free generator for the exact EmbeddingGemma WalkLM settings.
+  label-free reconstruction of the recorded EmbeddingGemma walk-text settings.
 - [`results/parameter_count.tsv`](results/parameter_count.tsv): conservative
   OGB multi-stage parameter accounting.
 - [`requirements-reproduction.txt`](requirements-reproduction.txt): Python
   dependencies, with the recorded PyTorch build documented separately.
-- [`results/cs_per_seed.tsv`](results/cs_per_seed.tsv): evaluator values for
+- [`results/v1/cs_per_seed.tsv`](results/v1/cs_per_seed.tsv): evaluator values for
   every seed before and after C&S.
-- [`results/summary.tsv`](results/summary.tsv): aggregate means and unbiased
+- [`results/v1/summary.tsv`](results/v1/summary.tsv): aggregate means and unbiased
   sample standard deviations.
-- [`results/environment.txt`](results/environment.txt): recorded machine and
+- [`results/v1/environment.txt`](results/v1/environment.txt): recorded machine and
   package versions.
-- [`results/stage3_manifest.tsv`](results/stage3_manifest.tsv): final
+- [`results/v1/stage3_manifest.tsv`](results/v1/stage3_manifest.tsv): final
   checkpoint sizes and timestamps.
-- [`results/stage3_sha256.txt`](results/stage3_sha256.txt): SHA-256 checksums
+- [`results/v1/stage3_sha256.txt`](results/v1/stage3_sha256.txt): SHA-256 checksums
   for the 10 final checkpoints.
 - [`scripts/post_process_detailed.py`](scripts/post_process_detailed.py):
   evaluator wrapper that sorts checkpoints numerically and reports unbiased
   standard deviation.
 - [`scripts/run_10_seeds.sh`](scripts/run_10_seeds.sh): restart-safe
   multi-seed training driver.
-- [`scripts/run_cs_detailed.sh`](scripts/run_cs_detailed.sh): portable C&S
-  invocation matching the recorded experiment.
+- [`scripts/run_cs_detailed.sh`](scripts/run_cs_detailed.sh): archived-v1 C&S
+  invocation matching the recorded exploratory experiment.
+- [`scripts/download_input_tensors.sh`](scripts/download_input_tensors.sh):
+  download, join, and checksum-verify the split EmbeddingGemma input.
+- [`scripts/reproduce_v2_from_release.sh`](scripts/reproduce_v2_from_release.sh):
+  download and verify the released predictions, reproduce the 27-point
+  validation grid, and compare the locked validation and final-test records.
+- [`scripts/compare_embeddinggemma_subset.py`](scripts/compare_embeddinggemma_subset.py):
+  deterministic prefix comparison for the reconstruction script.
 - [`SUBMISSION_CHECKLIST.md`](SUBMISSION_CHECKLIST.md): remaining steps for an
   official OGB submission.
 - [`report/technical_report.pdf`](report/technical_report.pdf): concise method,
@@ -207,12 +225,34 @@ portable SHA-256 checksums, a size manifest, the recorded environment, and a
 compressed bundle of the per-seed, validation-grid, and final-test logs. The
 approximately 4.6 GB tensors are linked rather than duplicated in Git.
 
-The archived v1 tensors and logs remain available in the
-[exploratory v1 release](https://github.com/MeghanaShanthappa/WalkLM/releases/tag/ogbn-products-sagn-10seed-20260903).
+The archived v1 small provenance artifacts are stored under
+[`artifacts/v1/`](artifacts/v1/). All 36 large v1 release assets were mirrored
+byte-for-byte into the [archived v1 release](https://github.com/MeghanaShanthappa/ld-walklm/releases/tag/ogbn-products-walklm-v1-exploratory-20260903).
+The superseded packaging repository is now private.
 
-## Reproducing EmbeddingGemma features
+## Obtaining the input tensors
 
-The exact recovered feature settings are preserved in a standalone script.
+The LD tensor is `products_sagn/hidden_state.pt` inside
+`bert-base-uncased.zip` from the [LD feature release](https://drive.google.com/drive/folders/109GHk4dtDf0hX_kQLDeMfnvz0Bo5aq_k?usp=drive_link)
+(Google Drive file ID `10HHIgaRPgWyVZAX9_FDeOk5cHiOHO2Mv`). Its expected
+shape is `2449029 x 768`, dtype is `float32`, size is 7,523,417,875 bytes,
+and SHA-256 is
+`fb1309cb73d4b1199b3eef342d6d3dc7ce2d2e38c57d50543fd8da0c8bbd6ec7`.
+
+The 8.5 GB EmbeddingGemma tensor will be mirrored in sub-2-GiB parts in the
+[v2 artifact release](https://github.com/MeghanaShanthappa/ld-walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904).
+This upload is still pending. Once present, `scripts/download_input_tensors.sh`
+downloads, joins, and verifies the parts.
+Its complete-file SHA-256 is
+`fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90`.
+`google/embeddinggemma-300m` is gated; reconstruction requires accepting its
+license and authenticating with Hugging Face. The reconstruction pins revision
+`57c266a7`. Only load tensors obtained from trusted sources.
+
+## Reconstructing EmbeddingGemma features
+
+The label-free script is a reconstruction written after the original run, not
+the original runtime file. It implements the recovered semantic settings.
 On a high-memory host with the OGB data and product text available:
 
 ```bash
@@ -252,24 +292,28 @@ bash scripts/run_10_seeds.sh
 Validate and hash those tensors with `scripts/verify_input_artifacts.py`
 before launching training.
 
-## Reproducing C&S
+## Archived v1 post-processing
 
-Install the versions recorded in `results/environment.txt`, clone
-`SAGN_with_SLE`, download the stage-3 checkpoint assets, and set:
+`scripts/run_cs_detailed.sh`, `results/v1/cs_per_seed.tsv`, and
+`results/v1/summary.tsv` are test-aware v1 artifacts. They do not reproduce the
+submitted v2 number.
+
+## Reproducing v2 from the released predictions
+
+The v2 aggregate can be reproduced without retraining. This workflow downloads
+the ten released stage-3 tensors, verifies the checked-in SHA-256 values,
+recomputes all 27 validation-only C&S candidates, verifies that the new lock
+matches the committed lock, and writes a separate reproduction of the final
+metric:
 
 ```bash
-export SAGN_ROOT=/path/to/SAGN_with_SLE
+export SAGN_ROOT=/path/to/patched/SAGN_with_SLE
 export PYTHON_BIN=/path/to/python
 export DATA_DIR=/path/to/OGB
-export PROBS_DIR=/path/to/intermediate_outputs
-export RESULTS_DIR=/path/to/output-results
+export REPRO_ROOT=/path/to/fresh/reproduction
 
-bash scripts/run_cs_detailed.sh
+bash scripts/reproduce_v2_from_release.sh
 ```
-
-The script requires exactly 10 non-empty stage-3 checkpoints and writes a
-fresh per-seed TSV before calculating the mean and unbiased sample standard
-deviation.
 
 ## Validation-locked v2 workflow
 
@@ -309,6 +353,5 @@ submission record includes a monitored contact email.
 
 V2 establishes a forward test-isolated selection boundary. It does not erase
 that EmbeddingGemma and the fixed pipeline were informed by the earlier v1
-test-aware exploration. The repository therefore presents 87.4984% as a
-prospective Top-1 result, preserves the history, and does not claim an official
-rank before OGB accepts the submission.
+test-aware exploration. The repository reports the measured result, preserves
+the history, and leaves official ranking to OGB's submission review.

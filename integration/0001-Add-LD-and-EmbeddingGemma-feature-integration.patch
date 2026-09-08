@@ -33,7 +33,7 @@ index f58449a..b2401e1 100644
 +                g.ndata['feat'] = load_products_feature_stack(
 +                    g.ndata['feat']
 +                ).to(device)
-+                print("Using LD + Gemma-WalkLM + raw features:",
++                print("Using LD + frozen EmbeddingGemma walk-text emb. (WalkLM-style) + raw features:",
 +                      tuple(g.ndata['feat'].shape))
  
          labels = labels.squeeze()
@@ -101,7 +101,7 @@ index 0000000..89799c3
 +
 +
 +def load_products_feature_stack(raw_features, ld_path=None, walklm_path=None):
-+    """Return [LD BERT, EmbeddingGemma WalkLM, raw OGB] in that order.
++    """Return [LD BERT, EmbeddingGemma walk-text (WalkLM-style), raw OGB] in that order.
 +
 +    Paths default to the LD_FEATURE_PATH and WALKLM_FEATURE_PATH environment
 +    variables. Tensor files must be trusted because older PyTorch versions
@@ -119,7 +119,7 @@ index 0000000..89799c3
 +    walklm = _load_local_tensor(walklm_path, preferred_key="walklm_x")
 +
 +    _validate("LD hidden state", ld, EXPECTED_DIMS["ld"])
-+    _validate("EmbeddingGemma WalkLM", walklm, EXPECTED_DIMS["walklm"])
++    _validate("EmbeddingGemma walk-text (WalkLM-style)", walklm, EXPECTED_DIMS["walklm"])
 +    _validate("raw OGB features", raw, EXPECTED_DIMS["raw"])
 +
 +    combined = torch.cat([ld, walklm, raw], dim=1)

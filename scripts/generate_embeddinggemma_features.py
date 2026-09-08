@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Recreate the EmbeddingGemma WalkLM feature tensor used in the experiment.
+"""Reconstruct the frozen EmbeddingGemma walk-text feature tensor.
 
-The implementation is a standalone preservation of the recovered 2026-08-21
-generation path. It intentionally does not train or evaluate a classifier and
+This file was written after the 2026-08-21 generation. It reconstructs the
+recorded semantic path but is not the original runtime program. It intentionally does not train or evaluate a classifier and
 never reads OGB labels. Random walks are sampled from the directed edge list
 with seed 42, textualized with the released product text, encoded with the
 last hidden state of google/embeddinggemma-300m, mean pooled, and L2 normalized.
@@ -15,11 +15,12 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 import torch
 import torch.nn.functional as F
+import transformers
 
 
 EXPECTED_NODES = 2_449_029
@@ -27,6 +28,7 @@ EXPECTED_EDGES = 123_718_280
 EXPECTED_WALKLM_DIM = 768
 EXPECTED_RAW_DIM = 100
 TEXT_FILE_ID = "1I-S176-W4Bm1iPDjQv3hYwQBtxE0v8mt"
+MODEL_REVISION = "57c266a7"
 ARCHIVED_SHA256 = (
     "fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90"
 )
@@ -80,11 +82,13 @@ def build_text_walk_corpus(
     walk_length: int,
     seed: int,
     max_text_chars: int,
+    max_nodes: Optional[int] = None,
 ) -> List[str]:
     generator = torch.Generator().manual_seed(seed)
     adjacency = build_adj_list(edge_index, len(text))
     corpus: List[str] = []
-    for node_index in range(len(text)):
+    output_nodes = len(text) if max_nodes is None else min(max_nodes, len(text))
+    for node_index in range(output_nodes):
         walks = [
             sample_walk(node_index, adjacency, walk_length, generator)
             for _ in range(num_walks)
@@ -138,12 +142,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--data-dir", required=True, help="Parent OGB data directory")
     parser.add_argument("--output", type=Path, default=Path(DEFAULT_OUTPUT))
     parser.add_argument("--model", default="google/embeddinggemma-300m")
+    parser.add_argument("--model-revision", default=MODEL_REVISION)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num-walks", type=int, default=4)
     parser.add_argument("--walk-length", type=int, default=4)
     parser.add_argument("--max-length", type=int, default=160)
     parser.add_argument("--max-text-chars", type=int, default=160)
     parser.add_argument("--batch-size", type=int, default=4)
+    parser.add_argument(
+        "--max-nodes",
+        type=int,
+        default=None,
+        help="Reconstruct only the deterministic leading node prefix",
+    )
     parser.add_argument("--force", action="store_true")
     return parser.parse_args()
 
@@ -153,6 +164,8 @@ def main() -> None:
     output = args.output.expanduser().resolve()
     if output.exists() and not args.force:
         raise SystemExit(f"Refusing to overwrite {output}; pass --force if intended")
+    if args.max_nodes is not None and args.max_nodes <= 0:
+        raise SystemExit("--max-nodes must be positive")
 
     from ogb.nodeproppred.dataset_pyg import PygNodePropPredDataset
     from torch_geometric.data import download_google_url
@@ -189,13 +202,18 @@ def main() -> None:
         walk_length=args.walk_length,
         seed=args.seed,
         max_text_chars=args.max_text_chars,
+        max_nodes=args.max_nodes,
     )
     print(f"Example walk text: {corpus[0][:500]}...", flush=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Loading language model: {args.model}", flush=True)
-    tokenizer = AutoTokenizer.from_pretrained(args.model)
-    model = AutoModel.from_pretrained(args.model, use_safetensors=True).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.model, revision=args.model_revision
+    )
+    model = AutoModel.from_pretrained(
+        args.model, revision=args.model_revision, use_safetensors=True
+    ).to(device)
     walklm_x = encode_texts(
         model,
         tokenizer,
@@ -204,11 +222,16 @@ def main() -> None:
         max_length=args.max_length,
         device=device,
     )
-    if tuple(walklm_x.shape) != (EXPECTED_NODES, EXPECTED_WALKLM_DIM):
+    output_nodes = EXPECTED_NODES if args.max_nodes is None else min(
+        args.max_nodes, EXPECTED_NODES
+    )
+    if tuple(walklm_x.shape) != (output_nodes, EXPECTED_WALKLM_DIM):
         raise RuntimeError(f"Unexpected embedding shape: {tuple(walklm_x.shape)}")
 
     output.parent.mkdir(parents=True, exist_ok=True)
-    torch.save({"walklm_x": walklm_x, "raw_x": data.x.cpu()}, output)
+    torch.save(
+        {"walklm_x": walklm_x, "raw_x": data.x[:output_nodes].cpu()}, output
+    )
     digest = sha256_file(output)
     metadata = {
         "output": str(output),
@@ -217,8 +240,11 @@ def main() -> None:
         "matches_archived_container": digest == ARCHIVED_SHA256,
         "walklm_shape": list(walklm_x.shape),
         "walklm_dtype": str(walklm_x.dtype),
-        "raw_shape": list(data.x.shape),
+        "raw_shape": list(data.x[:output_nodes].shape),
         "model": args.model,
+        "model_revision": args.model_revision,
+        "script_status": "post_hoc_reconstruction",
+        "max_nodes": args.max_nodes,
         "seed": args.seed,
         "num_walks": args.num_walks,
         "walk_length": args.walk_length,
@@ -228,6 +254,17 @@ def main() -> None:
         "max_text_chars": args.max_text_chars,
         "batch_size": args.batch_size,
         "torch": torch.__version__,
+        "transformers": transformers.__version__,
+        "cuda": torch.version.cuda,
+        "device": str(device),
+        "gpu": (
+            torch.cuda.get_device_name(device)
+            if device.type == "cuda"
+            else None
+        ),
+        "model_parameter_dtype": str(next(model.parameters()).dtype),
+        "encoder_fine_tuned": False,
+        "token_limit_effect": "walks_2_through_4_truncated_before_encoder",
     }
     metadata_path = output.with_suffix(output.suffix + ".metadata.json")
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")

@@ -1,0 +1,22 @@
+gpu: 0
+Namespace(gpu=0, dataset='ogbn-products', data_dir='/workspace/pyg-walklm/data/ogb', probs_dir='../intermediate_outputs', model='sagn', weight_style='attention', K=2, label_K=9, stage=3, use_labels=True, avoid_features=False, num_correction_layers=50, num_smoothing_layers=50, correction_alpha=0.3, smoothing_alpha=0.65, correction_adj='DAD', smoothing_adj='DAD', scale=25.0, autoscale=False, operations=['correction', 'smoothing'])
+Using LD + frozen EmbeddingGemma walk-text emb. (WalkLM-style) + raw features: torch.Size([2449029, 1636])
+# Nodes: 2449029
+# Edges: 123718280
+# Train: 196615
+# Val: 39323
+# Test: 2213091
+# Classes: 47
+../intermediate_outputs/ogbn-products/sagn/use_labels_True_use_feats_True_K_2_label_K_9_probs_seed_*_stage_3.pt
+Detect 1 model output files
+---------- Before ----------
+Train score: 0.9573±0.0000
+Valid score: 0.9395±0.0000
+Test score: 0.8735±0.0000
+Processing run: 0
+Performing correction...
+Performing smoothing...
+---------- Correct & Smooth ----------
+Train score: 0.9847±0.0000
+Valid score: 0.9394±0.0000
+Test score: 0.8753±0.0000

@@ -19,8 +19,16 @@
 - [x] Write the technical report and form-ready submission record.
 - [x] Publish all ten v2 checkpoints, logs, hashes, and environment metadata in the v2 GitHub release.
 - [x] Add the monitored submission contact email.
+- [x] Use the full predictor name and remove SCR from this method.
+- [x] Add author NVIDIA affiliations, a license, and the C&S citation.
+- [x] Add OGB-format tuned hyperparameters and complete v1/v2 disclosure.
+- [x] Add a v2-from-release reproduction script and mark v1 outputs archived.
 
 ## Before submitting
+
+- [ ] Mirror the EmbeddingGemma input in sub-2-GiB v2 release parts.
+- [x] Mirror all 36 v1 release assets into `ld-walklm` and make the old repository private.
+- [ ] Run and commit the EmbeddingGemma prefix cosine-similarity check.
 
 - [ ] Re-run validation post-processing from downloaded v2 assets and compare it with the committed records.
 - [ ] Include the concise historical protocol disclosure in the OGB submission.
@@ -36,5 +44,6 @@ Runs:       10 (seeds 10–19)
 Std:        unbiased sample standard deviation (ddof=1)
 External data: Yes
 OGB version: 1.3.6
-Status:     prospective Top-1; not official until accepted
+Method:     LD+EG-Walk+SAGN/SLE+C&S
+Status:     not official until accepted
 ```
