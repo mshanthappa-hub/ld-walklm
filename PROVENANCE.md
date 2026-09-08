@@ -69,7 +69,9 @@ path. It contains the GLEM title-and-description representation for each
 product, not an unspecified product raw-text corpus. The recorded Google Drive
 file ID is `1I-S176-W4Bm1iPDjQv3hYwQBtxE0v8mt`.
 
-Directed walks use the original `ogbn-products` edge orientation. For every
+Directed walks use the original `ogbn-products` edge orientation with
+61,859,140 as-loaded edge records. SAGN later symmetrizes the graph to
+123,718,280 edge records. For every
 start node, four walks of length four are sampled with a CPU PyTorch generator
 seeded to 42. Each visited node contributes at most 160 characters and nodes
 are separated by the string ` cites `. The concatenated text is tokenized to a

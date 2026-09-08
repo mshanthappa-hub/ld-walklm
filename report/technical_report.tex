@@ -67,7 +67,8 @@ Concatenated input & 1,636 & Order: LD, walk-text, raw \\
 \subsection{Walk-text extraction}
 
 For every node, four directed random walks of length four are sampled with seed
-42. Each visited product contributes the first 160 characters from
+42 from the 61,859,140 edge records loaded by OGB. SAGN later symmetrizes the
+graph to 123,718,280 edge records. Each visited product contributes the first 160 characters from
 \texttt{node-text.csv.gz}, the GLEM title-and-description text distributed by
 the PyG \texttt{TAGDataset} path. Nodes are separated by ``cites.'' The entire
 rendered text is tokenized to at most 160 tokens. Consequently, the first walk
