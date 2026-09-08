@@ -26,7 +26,7 @@
 
 ## Before submitting
 
-- [ ] Mirror the EmbeddingGemma input in sub-2-GiB v2 release parts.
+- [x] Mirror the EmbeddingGemma input in five sub-2-GiB v2 release parts.
 - [x] Mirror all 36 v1 release assets into `ld-walklm` and make the old repository private.
 - [ ] Run and commit the EmbeddingGemma prefix cosine-similarity check.
 

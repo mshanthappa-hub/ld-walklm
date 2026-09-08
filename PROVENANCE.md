@@ -46,9 +46,9 @@ fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90
 ```
 
 The original sidecar is retained verbatim at
-`artifacts/v1/walklm_embedding.sha256`. Upload of the tensor as sub-2-GiB
-release assets is pending. After that upload, it can be joined and verified
-with `scripts/download_input_tensors.sh`.
+`artifacts/v1/walklm_embedding.sha256`. The tensor is mirrored as five
+sub-2-GiB release assets and can be downloaded, joined, and verified with
+`scripts/download_input_tensors.sh`.
 
 Reverify trusted copies and regenerate the local manifest with:
 

@@ -239,10 +239,10 @@ shape is `2449029 x 768`, dtype is `float32`, size is 7,523,417,875 bytes,
 and SHA-256 is
 `fb1309cb73d4b1199b3eef342d6d3dc7ce2d2e38c57d50543fd8da0c8bbd6ec7`.
 
-The 8.5 GB EmbeddingGemma tensor will be mirrored in sub-2-GiB parts in the
+The 8.5 GB EmbeddingGemma tensor is mirrored in five sub-2-GiB parts in the
 [v2 artifact release](https://github.com/MeghanaShanthappa/ld-walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904).
-This upload is still pending. Once present, `scripts/download_input_tensors.sh`
-downloads, joins, and verifies the parts.
+`scripts/download_input_tensors.sh` downloads and verifies each part, joins
+them, and verifies the complete reconstructed file.
 Its complete-file SHA-256 is
 `fef45b647df5155bf17505508cb08ee5a164ad9b33b69910ad1b437109721c90`.
 `google/embeddinggemma-300m` is gated; reconstruction requires accepting its

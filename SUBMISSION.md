@@ -117,14 +117,12 @@ total cannot be recovered because some exploratory logs were not retained.
 
 ## Artifact release
 
-The ten v2 stage-3 predictions, logs, hashes, and environment metadata are
-published at the release below. Upload of the split EmbeddingGemma input tensor
-is still pending and must be completed before claiming full artifact coverage:
+The ten v2 stage-3 predictions, logs, hashes, environment metadata, and the
+five-part, checksum-verified EmbeddingGemma input tensor are published at:
 <https://github.com/MeghanaShanthappa/ld-walklm/releases/tag/ogbn-products-walklm-v2-10seed-20260904>
 
 ## Remaining actions
 
 1. Complete and record the subset reconstruction comparison.
-2. Upload and verify the split EmbeddingGemma input tensor.
-3. Send the updated repository and disclosure to OGB.
-4. Record the submission date and OGB decision.
+2. Send the updated repository and disclosure to OGB.
+3. Record the submission date and OGB decision.
