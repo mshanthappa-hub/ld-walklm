@@ -14,6 +14,7 @@ stored both arrays in one torch checkpoint.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import List, Optional
 
@@ -167,6 +168,10 @@ def main() -> None:
     if args.max_nodes is not None and args.max_nodes <= 0:
         raise SystemExit("--max-nodes must be positive")
 
+    # OGB 1.3.6 predates the PyTorch 2.6 weights_only default and stores a
+    # PyG Data object in its processed cache. This override is limited to this
+    # process and must only be used with the trusted official OGB dataset.
+    os.environ.setdefault("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD", "1")
     from ogb.nodeproppred.dataset_pyg import PygNodePropPredDataset
     from torch_geometric.data import download_google_url
     from torch_geometric import seed_everything
