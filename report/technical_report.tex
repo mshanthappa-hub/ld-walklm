@@ -164,9 +164,11 @@ values exactly match the corresponding archived tensor rows (mean cosine
 similarity 1.0, mean L2 difference 0.0, maximum absolute difference 0.0). The
 comparison JSON and reconstruction environment are committed in the repository.
 
-A v2-from-release script downloads all ten predictions, verifies their
-SHA-256 values, recomputes the validation grid and lock, and reproduces the
-final metric separately. Small v1 provenance artifacts have been migrated into
+A fresh execution of the v2-from-release script downloaded and verified all ten
+prediction tensors, recomputed all 27 validation candidates and the identical
+configuration lock, and reproduced the final test result
+$0.8749843545pm0.0004904255$. Its compressed log and SHA-256 are committed in
+the repository. Small v1 provenance artifacts have been migrated into
 this repository; large v1 assets are mirrored in an archived release. The
 public v2 release contains the predictions, hashes, environment, and log
 bundle. Each seed log ends with an upstream SAGN NumPy summary traceback after

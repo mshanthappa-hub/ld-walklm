@@ -30,7 +30,7 @@
 - [x] Mirror all 36 v1 release assets into `ld-walklm` and make the old repository private.
 - [x] Run and commit the 128-node EmbeddingGemma prefix comparison (exact equality; commit `7c09ca5`).
 
-- [ ] Re-run validation post-processing from downloaded v2 assets and compare it with the committed records.
+- [x] Reproduce all 27 validation candidates, lock, and final test from downloaded v2 assets (commit `c2dd7fa`).
 - [ ] Include the concise historical protocol disclosure in the OGB submission.
 - [ ] Submit through the official OGB process.
 - [ ] Add the submission date and official leaderboard URL or decision here.

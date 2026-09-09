@@ -198,7 +198,7 @@ in [`configs/experiment.yaml`](configs/experiment.yaml).
 - [`scripts/compare_embeddinggemma_subset.py`](scripts/compare_embeddinggemma_subset.py):
   deterministic prefix comparison for the reconstruction script.
 - [`results/reconstruction/`](results/reconstruction/): exact 128-row prefix
-  comparison and the reconstruction environment metadata.
+  comparison/environment plus the successful v2-from-release log and checksum.
 - [`SUBMISSION_CHECKLIST.md`](SUBMISSION_CHECKLIST.md): remaining steps for an
   official OGB submission.
 - [`report/technical_report.pdf`](report/technical_report.pdf): concise method,
@@ -356,6 +356,11 @@ The v2 validation grid, selected lock, access marker, final result, checkpoint
 hashes, size manifest, and environment record are preserved in Git. The public
 v2 release preserves all ten final tensors and the complete log bundle. The
 submission record includes a monitored contact email.
+
+A fresh execution from the public release verified all ten checkpoint hashes,
+recomputed all 27 validation candidates and the lock exactly, and reproduced
+the final test result `0.8749843545 ± 0.0004904255`. Its compressed log and
+SHA-256 are committed under `results/reconstruction/` at `c2dd7fa`.
 
 V2 establishes a forward test-isolated selection boundary. It does not erase
 that EmbeddingGemma and the fixed pipeline were informed by the earlier v1

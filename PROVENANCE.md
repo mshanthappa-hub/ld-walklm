@@ -145,6 +145,12 @@ their SHA-256 hashes, training and post-processing logs, evaluator outputs,
 training arguments, integration patch, two external tensor hashes and sizes,
 validation candidate records, selected lock, and guarded final result.
 
+A fresh run from the public v2 release verified every checkpoint checksum,
+recomputed the complete validation grid and lock, and reproduced the final
+`0.8749843545 ± 0.0004904255` result. The compressed verification log and its
+SHA-256 are committed under `results/reconstruction/` at commit `c2dd7fa`.
+
+
 The original modified EmbeddingGemma runtime file and exact generation
 environment were not preserved. The provided script reconstructs the recorded
 semantics and openly records this limitation.
