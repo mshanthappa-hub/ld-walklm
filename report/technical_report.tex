@@ -184,6 +184,17 @@ forward from this test-aware work. A conservative lower bound is 300 v1 test
 evaluations from the final ten-seed SAGN training alone; additional encoder
 and C\&S test looks were not fully preserved.
 
+The recovered product-subset history also contains completed 2-walk/3-step
+(256-token, 128-character) and 4-walk/4-step (160-token, 160-character)
+screens. A 4-walk/5-step, 160-token/128-character run completed its
+WalkLM-only evaluation but ended before the concatenated-feature evaluation.
+Further 4-walk/5-step and 6-walk/4-step trials with 192-token limits ended
+during model loading or corpus preparation because of memory pressure. The
+submitted frozen EmbeddingGemma tensor uses 4 walks of length 4 with
+160-token/160-character limits. Full per-encoder outcomes and the distinction
+between completed, partial, failed, and merely proposed trials are recorded in
+\href{https://github.com/MeghanaShanthappa/ld-walklm/blob/main/TUNING_AND_PROTOCOL.md}{\texttt{TUNING\_AND\_PROTOCOL.md}}.
+
 The 27-member v2 C\&S grid is identical to the focused v1 grid. V1 selected
 $(0.30,0.65,25)$ using test results; that candidate ranks 11th of 27 on v2
 validation. V2 selected $(0.35,0.60,20)$ using validation only.

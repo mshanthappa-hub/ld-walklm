@@ -54,10 +54,16 @@ smoothing_alpha: [0.60* (v2 validation), 0.65 (v1 test-selected), 0.70,
                   0.7153479868942039, 0.80]
 scale: [10, 15, 20* (v2 validation), 25 (v1 test-selected), 30]
 C&S adjacency: [DAD/DAD*]
-walks_per_node: [2 (earlier subset), 4* (v1 test-aware)]
-walk_length: [3 (earlier subset), 4* (v1 test-aware)]
-tokenizer_max_length: [160*, 256 (earlier subset default)]
-node_text_char_limit: [128 (earlier subset), 160*]
+walks_per_node: [2 (completed earlier subset), 4* (completed; v1 test-aware),
+                 6 (attempted; OOM)]
+walk_length: [3 (completed earlier subset), 4* (completed; v1 test-aware),
+              5 (partially evaluated / OOM)]
+tokenizer_max_length: [160*, 192 (attempted; OOM),
+                       256 (earlier subset default)]
+node_text_char_limit: [128 (earlier subset / partial longer-walk run),
+                       160*, 192 (attempted; OOM)]
+walk_encoder_mlm_epochs: [0* (frozen EmbeddingGemma),
+                          1, 2 (test-aware DistilBERT screening)]
 epoch_selection: validation early stopping*
 ```
 

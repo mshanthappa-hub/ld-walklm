@@ -45,11 +45,28 @@ memory workarounds rather than completed candidates. No principled reason for
 forward from the test-visible v1 work. It is therefore classified as a
 test-aware choice rather than a validation-only v2 choice.
 
-Walk construction was also varied during early subset experiments. A products
-subset command used two walks of length three, 128-character node text, and
-the then-default 256-token encoder limit. The full EmbeddingGemma artifact used
-four walks of length four and 160-character/160-token limits. This was not a
-systematic controlled grid, but it was prior method variation and is disclosed.
+Walk construction was also varied during early subset experiments. The
+recovered chat transcript and surviving artifact names distinguish completed,
+partial, and failed trials as follows:
+
+| Encoder / status | Walks | Walk length | Token limit | Node-text limit | MLM epochs | Preserved outcome |
+|---|---:|---:|---:|---:|---:|---|
+| TinyBERT, completed subset baseline | 2 | 3 | 256 (then-default) | 128 | 1 | WalkLM-only 0.7284; WalkLM+raw 0.7823 |
+| DistilBERT, completed subset screen | 4 | 4 | 160 | 160 | 1 | WalkLM-only 0.8032; WalkLM+raw 0.8283 |
+| DistilBERT, completed subset screen | 4 | 4 | 160 | 160 | 2 | WalkLM-only 0.8101; WalkLM+raw 0.8345 |
+| BERT-base, completed subset screen | 4 | 4 | 160 | 160 | 1 | WalkLM-only 0.8015; WalkLM+raw 0.8282 |
+| DistilBERT, partial subset screen | 4 | 5 | 160 | 128 | 1 | WalkLM-only 0.7893; process ended before WalkLM+raw evaluation |
+| DistilBERT, failed memory trial | 4 | 5 | 192 | 160 | 1 | ended after model loading / corpus preparation |
+| DistilBERT, failed memory trial | 6 | 4 | 192 | 192 | 1 | ended after model loading / corpus preparation |
+| Frozen EmbeddingGemma, full artifact | 4 | 4 | 160 | 160 | 0 | configuration used by the submitted feature tensor |
+
+The nominal `--max_nodes 500000` subset construction produced 725,745 nodes.
+These runs exposed test accuracy and informed the final method, so the choices
+are classified as v1 test-aware. They were not a systematic controlled grid.
+A 4-walk/8-step smoke command failed on missing dependencies before an
+experiment ran; memory-safer 6-walk retries and a 256-character variant were
+suggested in chat but lack evidence of completed execution, so they are not
+listed as tuned candidates.
 
 ## Recovered C&S exploration
 
