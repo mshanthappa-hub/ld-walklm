@@ -163,19 +163,24 @@ one-time post-C&S result, committed at
 Final test: 0.8749843545 ± 0.0004904255
 ```
 
-Independent recalculation reproduces both validation and test aggregates and
-confirms that the locked candidate is the actual validation-grid winner. No
-v2 test accuracy was computed outside the guarded final invocation according to
-the preserved commands, logs, marker, and repository history.
+A later end-to-end reproduction from the public release recomputed both
+validation and test aggregates and confirmed the locked winner. It invoked the
+same final-only evaluator behind a fresh `REPRODUCTION_TEST_ACCESS_STARTED`
+marker after the lock and original result were already public. Thus two
+post-lock v2 test computations are preserved: the original guarded final
+evaluation and this later verification; no unguarded v2 test computation is
+evidenced.
 
 The selected setting exceeds the runner-up, `(0.30, 0.60, 25)`, by
 0.0000762912 mean validation accuracy. That is exactly three validation nodes
 per seed on average, or 30 additional correct predictions across ten seeds.
 
-A conservative lower bound is 300 v1 test evaluations from the final ten-seed
-SAGN training alone: 30 evaluation points per seed across four stages. Encoder
-screening, feature-stack trials, and C&S comparisons added further test looks.
-The exact total is not recoverable because some exploratory logs were not
+The recovered history gives a stronger lower bound of about 1,550 epoch-level
+v1 test reports: 300 from final ten-seed SAGN training and about 1,250 from the
+clearly identified completed or partial TinyBERT/DistilBERT/BERT-base subset
+classifier runs. Additional BGE, E5, Qwen, EmbeddingGemma, feature-stack, SAGN,
+and C&S comparisons make the true total plausibly a few thousand. An exact
+count is not recoverable because some exploratory logs were deleted or not
 retained.
 
 ## Artifact release

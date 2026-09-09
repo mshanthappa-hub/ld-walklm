@@ -112,14 +112,19 @@ validation, the v1 test-selected setting `(0.30, 0.65, 25)` ranked 11th among
 Seeds 0 through 9 were consumed by the test-aware v1 exploration. V2 therefore
 preregistered fresh seeds 10 through 19, reported all ten without selection,
 masked test labels during training and validation selection, committed the
-validation lock, and then performed one guarded final test invocation. V2
-creates a forward test-isolated boundary but cannot erase the earlier method
-selection. Full details are in `TUNING_AND_PROTOCOL.md`.
+validation lock, and then performed one guarded final test invocation. A later
+public-release reproduction recomputed the same test aggregate through the same
+final-only guard in a fresh output directory, after the lock and original result
+were public. No unguarded v2 test computation is evidenced. V2 creates a
+forward test-isolated boundary but cannot erase the earlier method selection.
+Full details are in `TUNING_AND_PROTOCOL.md`.
 
-A conservative lower bound is 300 v1 test evaluations from the final ten-seed
-SAGN training alone: 30 evaluation points per seed. Encoder screening,
-feature-stack trials, and C&S comparisons added more test looks, but the exact
-total cannot be recovered because some exploratory logs were not retained.
+The recovered history gives a lower bound of about 1,550 epoch-level v1 test
+reports: 300 from final ten-seed SAGN training and about 1,250 from clearly
+identified completed or partial subset classifier runs. Additional encoder,
+feature-stack, SAGN, and C&S comparisons make the true total plausibly a few
+thousand; the exact count is unrecoverable because some logs were deleted or
+not retained.
 
 ## Artifact release
 

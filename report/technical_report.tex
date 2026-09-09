@@ -167,7 +167,7 @@ comparison JSON and reconstruction environment are committed in the repository.
 A fresh execution of the v2-from-release script downloaded and verified all ten
 prediction tensors, recomputed all 27 validation candidates and the identical
 configuration lock, and reproduced the final test result
-$0.8749843545pm0.0004904255$. Its compressed log and SHA-256 are committed in
+$0.8749843545\pm0.0004904255$. Its compressed log and SHA-256 are committed in
 the repository. Small v1 provenance artifacts have been migrated into
 this repository; large v1 assets are mirrored in an archived release. The
 public v2 release contains the predictions, hashes, environment, and log
@@ -180,9 +180,11 @@ checkpoint before continuing.
 The v1 experiment compared language encoders, feature stacks, SAGN settings,
 and C\&S candidates while test accuracy was visible. The final SAGN values,
 including $K=2$, hidden size 512, epoch schedule, and batch size, were carried
-forward from this test-aware work. A conservative lower bound is 300 v1 test
-evaluations from the final ten-seed SAGN training alone; additional encoder
-and C\&S test looks were not fully preserved.
+forward from this test-aware work. The recovered history gives a lower bound
+of about 1,550 epoch-level v1 test reports: 300 from final ten-seed SAGN
+training and about 1,250 from clearly identified completed or partial subset
+classifier runs. Additional encoder, feature-stack, SAGN, and C\&S comparisons
+make the true total plausibly a few thousand; the exact count is unrecoverable.
 
 The recovered product-subset history also contains completed 2-walk/3-step
 (256-token, 128-character) and 4-walk/4-step (160-token, 160-character)
@@ -204,8 +206,10 @@ selection rule before v2 execution. Training masked all test labels and
 reported no test metric. Every candidate record declares
 \texttt{test\_metrics\_accessed: false}. The records and selected lock were
 committed before the guarded final-test command, which wrote a durable marker
-before dataset access. No other v2 test evaluation is present in the preserved
-commands, logs, marker, or repository history.
+before dataset access. A later public-release reproduction invoked the same
+final-only evaluator behind a fresh reproduction marker after the lock and
+original result were public. These are the two preserved post-lock v2 test
+computations; no unguarded v2 test computation is evidenced.
 
 This creates a forward test-isolated boundary but cannot erase v1 method
 selection. The complete controlling disclosure is
