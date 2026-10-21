@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: MIT
+-->
+
 # LD + frozen EmbeddingGemma walk-text embeddings (WalkLM-style) + SAGN/SLE + C&S on ogbn-products
 
 Reproducibility and submission evidence for a 10-seed `ogbn-products`
@@ -9,6 +14,16 @@ and Correct & Smooth (C&S).
 - Meghana Shanthappa (NVIDIA)
 - Junhao Shen (NVIDIA)
 - Rishi Puri (NVIDIA)
+
+## License and contribution policy
+
+NVIDIA-authored source and documentation use the [MIT license](LICENSE).
+Third-party components retain their own terms; see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [LICENSES/](LICENSES/README.md).
+Models, datasets, text, and generated feature/checkpoint artifacts are not
+automatically licensed under MIT; see [licensing scope](docs/LICENSING.md).
+External contributions are not currently accepted; see
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Walk-text representation
 

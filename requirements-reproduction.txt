@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Third-party packages retain their own terms; see THIRD_PARTY_NOTICES.md.
+
 # The recorded run used Python 3.10 and a PyTorch 2.12.0.dev CUDA 12.8 build.
 # Install the matching PyTorch build for the target GPU separately.
 dgl==1.1.3

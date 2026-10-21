@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: MIT
+-->
+
 # Archived v1 exploratory results
 
 These files belong to the test-aware v1 experiment over seeds `0..9`. They are

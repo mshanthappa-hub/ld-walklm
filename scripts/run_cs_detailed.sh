@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: MIT
+# See ../THIRD_PARTY_NOTICES.md for dependency and third-party code notices.
+
 # ARCHIVED V1 ONLY: this evaluates the test-aware (0.30, 0.65, 25) setting.
 # It does not reproduce the validation-locked v2 submission candidate.
 set -euo pipefail

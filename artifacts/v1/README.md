@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: MIT
+-->
+
 # Migrated v1 provenance artifacts
 
 These small artifacts were copied verbatim from the superseded experiment

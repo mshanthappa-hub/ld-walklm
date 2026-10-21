@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: MIT
+
 experiment_id: ogbn-products-walklm-v1-exploratory
 status: archived_test_aware_exploration
 
