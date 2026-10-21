@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: MIT
+# See ../THIRD_PARTY_NOTICES.md for dependency and third-party code notices.
+
 set -euo pipefail
 
 : "${SOURCE_REPO:?Set SOURCE_REPO to the superseded repository}"

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: MIT
+# See ../THIRD_PARTY_NOTICES.md for dependency and third-party code notices.
+
 """Compare reconstructed prefix embeddings with the archived tensor rows."""
 
 import argparse
