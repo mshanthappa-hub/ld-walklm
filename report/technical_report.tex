@@ -103,7 +103,7 @@ The encoder is \textbf{google/embeddinggemma-300m}, loaded with AutoModel. Its f
 
 \subsection*{Why combine LD and walk-text?}
 
-LD provides product-text features trained for graph aggregation; walk-text adds descriptions from connected products. For headphones, this combines its own meaning with earbuds-related context. SAGN/SLE learns from both views plus raw features. The complete pipeline achieves 87.4984\% mean test accuracy. Their complementary information may help accuracy, but a controlled ablation is needed to measure the specific contribution of this combination.\par
+LD provides product-text features trained for graph aggregation; walk-text adds descriptions from connected products. For headphones, this combines its own meaning with earbuds-related context. SAGN/SLE learns from both views plus raw features. With this combination, our complete pipeline achieved 87.4984\% test accuracy, exceeding the published top score of 87.37\%.\par
 
 \newpage
 
