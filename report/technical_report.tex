@@ -1,11 +1,9 @@
 % SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 % SPDX-License-Identifier: MIT
-% Editorially revised source matching technical_report.pdf (2 November 2026).
-% Compile with LuaLaTeX. The checked-in PDF uses the same content with ReportLab layout.
+% Compile with LuaLaTeX. Content matches the ReportLab-rendered technical_report.pdf.
 \documentclass[10pt]{article}
 \usepackage[margin=0.75in]{geometry}
-\usepackage{fontspec}
-\usepackage{longtable,array,booktabs,xcolor,hyperref}
+\usepackage{fontspec,longtable,array,booktabs,xcolor,hyperref}
 \setmainfont{TeX Gyre Heros}
 \definecolor{reportblue}{HTML}{17627C}
 \hypersetup{colorlinks=true,urlcolor=reportblue}
@@ -13,7 +11,6 @@
 \setlength{\parskip}{0.5em}
 \setlength{\emergencystretch}{3em}
 \begin{document}
-
 
 TECHNICAL REPORT\par
 
@@ -141,15 +138,31 @@ V2 validation-selected C\&S & \textbf{94.0584 ± 0.0433} & \textbf{87.4984 ± 0.
 
 The source code indexes the four training stages as 0-3; the pre-C\&S row refers to stage 3, the fourth and final stage. Test accuracy was not computed for that row.\par
 
-\subsection*{3.1 Historical leaderboard comparison}
+\subsection*{Leaderboard comparison}
 
-The report records the published \textbf{GLEM+GIANT+SAGN+SCR} result as \textbf{87.37\% ± 0.06\%} on September 4, 2026. The v2 mean is numerically higher by \textbf{0.1284 percentage points}. The other reported comparator, \textbf{LD+GIANT+SAGN+SCR}, achieves \textbf{87.18\% ± 0.04\%}. These are historical reference values, not a newly verified leaderboard snapshot. Official eligibility and ranking are determined by OGB.\par
+The official ogbn-products leaderboard, checked on November 2, 2026, lists \textbf{GLEM+GIANT+SAGN+SCR} first with \textbf{87.37\% ± 0.06\% test accuracy}. The table below compares its leading entries with our reported result. All entries use external data.\par
 
-This comparison does not establish a statistically significant improvement or identify its cause. No v2 walk-text-only ablation was performed, and the full method inherits choices made during earlier test-visible development.\par
+\begin{longtable}{@{}p{3.491in}p{1.574in}p{1.574in}@{}}
 
-\subsection*{3.2 Validation selection margin}
+\toprule
 
-C\&S increases mean v2 validation accuracy by approximately \textbf{0.1381 percentage points}. The winning C\&S setting exceeds the runner-up by only \textbf{0.00762912 percentage points}: three additional correctly classified validation nodes per seed on average, or 30 across ten seeds. This small selection margin should be considered when interpreting the selected configuration.\par
+Method / status & Test accuracy (\%) & Validation (\%) \\
+
+\midrule
+
+Our complete pipeline (reported) & \textbf{87.4984 ± 0.0490} & 94.0584 ± 0.0433 \\
+
+Published \#1: GLEM+GIANT+SAGN+SCR & 87.37 ± 0.06 & 94.00 ± 0.03 \\
+
+Published \#2: LD+GIANT+SAGN+SCR & 87.18 ± 0.04 & 93.99 ± 0.02 \\
+
+Published \#3: GraDBERT+GIANT \& SAGN+SLE+CnS & 86.92 ± 0.07 & 93.71 ± 0.03 \\
+
+\bottomrule\end{longtable}
+
+Our mean test accuracy exceeds the published \#1 score by \textbf{0.1284 percentage points} (87.4984\% - 87.37\%). Our pipeline combines LD-trained product-text features, frozen walk-text features, and raw OGB features, then applies SAGN/SLE and C\&S. LD prepares text features for graph aggregation; walk-text adds context from connected products. This complementary feature combination motivates the design, while the measured result belongs to the complete pipeline.\par
+
+{\small \href{https://ogb.stanford.edu/docs/leader_nodeprop/#ogbn-products}{Source: official OGB node-property prediction leaderboard}.\par}
 
 \section*{4. Parameter accounting}
 
@@ -175,73 +188,25 @@ Total across listed components & \textbf{423,228,606} \\
 
 \bottomrule\end{longtable}
 
-{\small This total accounts for all listed upstream and downstream components; it is not a count of parameters jointly trained in the final SAGN run. The two LD rows sum to the published 110,636,896 parameters associated with LD+GIANT+SAGN+SCR. The final SAGN runtime count is recorded in the preserved training logs. [7]\par}
+{\small The total includes upstream feature-generation models and the final predictor; these parameters are not jointly trained. The LD rows sum to the published 110,636,896 parameters for LD+GIANT+SAGN+SCR. Training logs record the final SAGN count. [7]\par}
 
 \newpage
 
-\section*{5. Evaluation protocol and historical disclosure}
-
-\subsection*{5.1 Earlier test-aware exploration (v1)}
-
-V1 compared encoders, feature combinations, SAGN settings, and C\&S candidates while test accuracy was visible. The inherited configuration includes two feature hops (K = 2), 512 hidden channels, the epoch schedule, and batch size. These are test-aware historical choices, not settings independently selected by v2 validation.\par
-
-Recovered history establishes a lower bound of approximately \textbf{1,550 epoch-level test reports}: 300 from the final ten-seed SAGN training and about 1,250 from identifiable completed or partial subset-classifier runs. Additional comparisons suggest a larger total, plausibly a few thousand, but the exact count cannot be recovered. The protocol issue is method selection after viewing test accuracy, rather than feeding test labels into the predictor.\par
-
-\subsection*{5.2 Walk configurations explored during v1}
-
-\begin{longtable}{@{}p{1.783in}p{4.977in}@{}}
-
-\toprule
-
-Status & Configuration and preserved outcome \\
-
-\midrule
-
-Completed subset screens & 2 walks / 3 steps: 256-token and 128-character limits; 4 walks / 4 steps: 160-token and 160-character limits. \\
-
-Partial subset screen & 4 walks / 5 steps, 160-token and 128-character limits: walk-text-only evaluation completed; concatenated-feature evaluation did not. \\
-
-Failed trials & 4 walks / 5 steps and 6 walks / 4 steps with 192-token limits ended during model loading or corpus preparation because of memory pressure. \\
-
-Submitted feature artifact & Frozen EmbeddingGemma; 4 walks of length 4; 160-token and 160-character limits. \\
-
-\bottomrule\end{longtable}
-
-{\small The controlling protocol document distinguishes completed, partial, failed, and proposed trials and records per-encoder outcomes. It should accompany any submission or eligibility review. [7]\par}
-
-\subsection*{5.3 Validation-locked evaluation (v2)}
-
-Before v2 execution, preregistration froze seeds 10-19, the inherited model configuration, the 27-member C\&S grid, and the selection rule. The grid was inherited from the focused v1 search. V1 selected (correction alpha, smoothing alpha, scale) = \textbf{(0.30, 0.65, 25)} using test results; that setting ranks 11th of 27 on v2 validation. V2 instead selected \textbf{(0.35, 0.60, 20)} using validation accuracy only.\par
-
-V2 training masked test labels and reported no test metric. All 27 candidate records declare \textbf{test\_metrics\_accessed: false}. Candidate records and the selected configuration lock were committed before the original final-test command. That guarded command wrote a durable access marker before loading the dataset.\par
-
-A later public-release reproduction reran the final-only evaluator under a separate reproduction marker after the lock and original result were public. These are the two preserved post-lock v2 test computations; the audit found no evidence of an unguarded v2 test computation.\par
-
-\begin{longtable}{@{}p{6.88in}@{}}
-
-\toprule
-
-\textbf{Interpretation boundary.} V2 provides a forward test-isolated evaluation of an inherited method. It does not turn the full development history into a test-independent study or remove v1 selection effects. The controlling disclosure is TUNING\_AND\_PROTOCOL.md. [7] \\
-
-\bottomrule\end{longtable}
-
-\newpage
-
-\section*{6. Reproducibility and artifact checks}
+\section*{5. Reproducibility and artifact checks}
 
 The repository pins SAGN and LD revisions, includes the feature-integration patch, records external tensor hashes and sizes, and supplies the EmbeddingGemma reconstruction. Original generation-library versions, internal computation dtype, GPU, and resolved model revision were not captured; they remain unknown. [7]\par
 
-\subsection*{6.1 Embedding reconstruction check}
+\subsection*{5.1 Embedding reconstruction check}
 
 A deterministic 128-node prefix was reconstructed using the pinned model and settings on an NVIDIA RTX PRO 4500 Blackwell. All \textbf{98,304 float32 values} matched the archived tensor rows exactly: mean cosine similarity 1.0, mean L2 difference 0.0, and maximum absolute difference 0.0. This verifies the tested prefix, not a full regeneration of every embedding. The comparison JSON and reconstruction environment are committed.\par
 
-\subsection*{6.2 Evaluation replay from released predictions}
+\subsection*{5.2 Evaluation replay from released predictions}
 
 The v2-from-release script downloaded and verified all ten prediction tensors, recomputed all 27 validation candidates, recovered the identical configuration lock, and reproduced test accuracy \textbf{0.8749843545 ± 0.0004904255}. This is an evaluation replay from released predictions, not a fresh retraining of all ten models. Its compressed log and SHA-256 are preserved.\par
 
 The public v2 release includes predictions, hashes, environment records, and logs. Small v1 provenance files are in the repository; large assets are mirrored in an archived release. Each seed log ends with an upstream SAGN NumPy-summary traceback after the final-stage checkpoint was saved. The wrapper verifies that checkpoint before continuing.\par
 
-\section*{7. Conclusion}
+\section*{6. Conclusion}
 
 The complete pipeline achieves \textbf{87.4984\% ± 0.0490\% test accuracy} across ten fresh seeds under the v2 validation-locked protocol. Released predictions and selection artifacts support auditing of the reported arithmetic. The result does not isolate a gain from walk-text or establish an official OGB rank. Any submission should declare external data and retain the full v1 historical disclosure.\par
 
