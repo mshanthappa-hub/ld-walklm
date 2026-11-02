@@ -218,7 +218,7 @@ in [`configs/experiment.yaml`](configs/experiment.yaml).
   official OGB submission.
 - [`report/technical_report.pdf`](report/technical_report.pdf): concise method,
   result, reproducibility, and protocol report.
-- [Technical report with worked examples](report/Combining_Walk_Text_and_Label_Deconvolution_Embeddings_for_SAGN_Based_Product_Node_Classification.pdf): model equations,
+- [Technical report with worked examples](report/Combining_Walk_Text_and_Label_Deconvolution_Embeddings_for_SAGN_Based_Product_Node_Classification.pdf): abstract, method explanations,
   training configuration, ten-seed results, baseline comparisons, and evaluation limitations.
 - [`TUNING_AND_PROTOCOL.md`](TUNING_AND_PROTOCOL.md): full tuning disclosure
   and the controlling leaderboard-eligibility status.
