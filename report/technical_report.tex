@@ -27,7 +27,7 @@ A validation-locked, ten-seed study with SAGN/SLE and Correct \& Smooth\par
 
 \subsection*{Abstract}
 
-We study node classification on \textbf{ogbn-products} by combining released Label Deconvolution (LD) BERT features, frozen EmbeddingGemma encodings of graph-walk text, and original OGB features. The resulting 1,636-dimensional node representation feeds a four-stage SAGN model with self-label-enhanced training (SLE), followed by Correct \& Smooth (C\&S). Across ten fresh seeds, the validation-locked v2 pipeline achieves \textbf{94.0584\% ± 0.0433\% validation accuracy} and \textbf{87.4984\% ± 0.0490\% test accuracy} (mean ± sample standard deviation). The configuration lock was committed before the original guarded final-test evaluation. Earlier test-aware v1 exploration informed the inherited encoder and model configuration; fresh seeds and a later validation-only protocol do not remove that historical dependence.\par
+We study node classification on \textbf{ogbn-products} by combining released Label Deconvolution (LD) BERT features, frozen EmbeddingGemma encodings of graph-walk text, and original OGB features. The resulting 1,636-dimensional node representation feeds a four-stage SAGN model with self-label-enhanced training (SLE), followed by Correct \& Smooth (C\&S). Across ten fresh seeds, the validation-locked v2 pipeline achieves \textbf{94.0584\% ± 0.0433\% validation accuracy} and \textbf{87.4984\% ± 0.0490\% test accuracy} (mean ± sample standard deviation).\par
 
 \section*{1. Dataset and study design}
 
