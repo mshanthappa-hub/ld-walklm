@@ -81,15 +81,15 @@ Concatenated input & 1,636 & Order: LD, walk-text, raw \\
 
 LD features are reused from the released feature tensor; LD is not retrained in this experiment. The concatenated features are then used to train the downstream SAGN/SLE predictor. [2, 3]\par
 
-\subsection*{2.2 Graph-walk text and frozen encoding}
+\subsection*{2.2 WalkLM and Label Deconvolution: a product example}
 
-For each node, the extraction procedure samples four directed walks of length four with random seed 42, using the loader's directional edge records in their as-loaded order. Each visited product contributes the first 160 characters of its title-and-description text from \textbf{node-text.csv.gz}, distributed through the PyG \textbf{TAGDataset} path using GLEM text. The literal separator between products is \textbf{"cites"}; it is an implementation detail, not a description of the co-purchase relation.\par
+\textbf{Example product graph.} In an illustrative co-purchase graph, headphones connect to earbuds and a phone case; the earbuds connect to Sony WF-1000XM5 earbuds. Products are nodes, descriptions are attributes, and links indicate co-purchases.\par
 
-The complete rendered text is truncated to 160 tokens. In the archived configuration, the first walk fills that budget; walks two through four therefore do not reach the encoder. The nominal four-walk sampling configuration should not be interpreted as four walks consumed by the language model.\par
+\textbf{WalkLM: read product text along a graph walk.} A graph walk follows connected nodes, for example \textbf{Headphones → Earbuds → Sony WF-1000XM5 earbuds}. WalkLM converts the visited products' attributes into text and fine-tunes a language model on these sequences. Its embeddings combine product meaning with graph context. Our implementation uses walk-text with a frozen encoder. [4]\par
+
+\textbf{LD (Label Deconvolution): prepare text features for graph aggregation.} A GNN mixes the headphones' features with neighboring audio products and a phone case, although connected products may have different categories. LD uses training-label information propagated over the graph to learn adjusted training targets for the text encoder, helping it produce features suited to that later mixing. The headphones' correct category remains unchanged. We reuse released LD-trained BERT embeddings. [3]\par
 
 The encoder is \textbf{google/embeddinggemma-300m}, loaded with AutoModel. Its final hidden states are mean-pooled over non-padding tokens using the attention mask, then L2-normalized. The encoder is frozen. Unlike original WalkLM, this experiment does not fine-tune a language model on graph-walk text; \textbf{WalkLM-style} refers only to graph-walk textualization. [4, 6]\par
-
-{\small The original modified generation source was not committed. The supplied generation script is a post-hoc reconstruction pinned to model revision \textbf{57c266a7}; the originally resolved revision is unknown. The recovered command uses \textbf{--mlm\_epochs 0} to keep the encoder frozen. Its \textbf{--epochs 1} option trains diagnostic downstream classifiers and does not affect the saved embeddings. [7]\par}
 
 \subsection*{2.3 Predictor and post-processing}
 
@@ -115,7 +115,7 @@ Self-training thresholds & 0.95 / 0.95 / 0.999 \\
 
 \bottomrule\end{longtable}
 
-{\small C\&S uses 50 correction iterations and 50 smoothing iterations, DAD/DAD normalization, correction alpha 0.35, smoothing alpha 0.60, and scale 20. Only training labels enter SAGN/SLE label features and C\&S propagation. Validation labels support early stopping and selection; test labels are excluded from propagation. [2, 5, 7]\par}
+{\small C\&S uses 50 correction iterations and 50 smoothing iterations, correction alpha 0.35, smoothing alpha 0.60, and scale 20. Only training labels enter SAGN/SLE label features and C\&S propagation. Validation labels support early stopping and selection; test labels are excluded from propagation. [2, 5, 7]\par}
 
 \newpage
 
