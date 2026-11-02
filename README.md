@@ -218,6 +218,8 @@ in [`configs/experiment.yaml`](configs/experiment.yaml).
   official OGB submission.
 - [`report/technical_report.pdf`](report/technical_report.pdf): concise method,
   result, reproducibility, and protocol report.
+- [Worked-example report](report/Combining_Walk_Text_and_Label_Deconvolution_Embeddings_for_SAGN_Based_Product_Node_Classification.pdf): illustrated explanations of
+  LD, frozen walk-text feature fusion, SAGN/SLE, and Correct & Smooth.
 - [`TUNING_AND_PROTOCOL.md`](TUNING_AND_PROTOCOL.md): full tuning disclosure
   and the controlling leaderboard-eligibility status.
 - [`SUBMISSION.md`](SUBMISSION.md): form-ready metadata and remaining actions.
